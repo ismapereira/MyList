@@ -8,7 +8,8 @@ CREATE TABLE usuarios (
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(120) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    preferencias JSON DEFAULT NULL
 );
 
 -- Tabela de listas de mercado
@@ -31,3 +32,7 @@ CREATE TABLE itens_lista (
     status ENUM('pendente', 'concluido') DEFAULT 'pendente',
     FOREIGN KEY (lista_id) REFERENCES listas(id) ON DELETE CASCADE
 );
+
+-- Script de atualização para adicionar coluna de preferências (se necessário)
+ALTER TABLE usuarios
+ADD COLUMN IF NOT EXISTS preferencias JSON DEFAULT NULL;

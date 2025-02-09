@@ -37,41 +37,44 @@ body {
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
+/* Botões */
 .btn-primary {
-    background-color: #2C5282;
-    color: white;
-    transition: all 0.3s ease;
-    will-change: transform, background-color;
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200;
 }
 
 .btn-primary:hover {
-    background-color: #1A365D;
-    transform: translateY(-3px);
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fade-in-up {
-    animation: fadeInUp 0.8s ease-out;
-}
-
-/* Botões */
-.btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+    @apply transform -translate-y-0.5 shadow-lg;
 }
 
 /* Formulários */
+.form-input {
+    @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition-all duration-200;
+}
+
 .form-select {
     @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    @apply relative inline-block w-14 h-7 bg-gray-200 rounded-full cursor-pointer transition-all duration-200;
+}
+
+.toggle-switch::after {
+    content: '';
+    @apply absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-all duration-200;
+}
+
+input:checked + .toggle-switch {
+    @apply bg-blue-500;
+}
+
+input:checked + .toggle-switch::after {
+    @apply transform translate-x-7;
+}
+
+input:focus + .toggle-switch {
+    @apply ring-2 ring-blue-200;
 }
 
 /* Spinner de carregamento */
@@ -88,48 +91,135 @@ body {
 }
 
 /* Toast Notifications */
-#toast-container {
-    @apply fixed top-4 right-4 z-50 space-y-2;
+.toast {
+    @apply flex items-center p-4 rounded-lg shadow-lg text-white mb-3 transform transition-all duration-300;
 }
 
-/* Cards e Containers */
-.card {
-    @apply bg-white p-6 rounded-xl shadow-md;
+.toast.success {
+    @apply bg-green-500;
+}
+
+.toast.error {
+    @apply bg-red-500;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+}
+
+.animate-fade-in-down {
+    animation: fadeInDown 0.3s ease-out forwards;
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.3s ease-in forwards;
+}
+
+/* Cards e Seções */
+.section-card {
+    @apply bg-white p-6 rounded-xl shadow-md transition-all duration-200;
+}
+
+.section-card:hover {
+    @apply shadow-lg;
 }
 
 /* Ícones */
 .feather {
-    @apply w-5 h-5;
+    @apply stroke-current;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
 }
 
-/* Modal */
-.modal-backdrop {
-    @apply fixed inset-0 bg-black bg-opacity-50 z-40;
-}
-
-.modal-container {
-    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
-}
-
-.modal-content {
-    @apply bg-white rounded-xl shadow-lg max-w-md w-full mx-auto;
-}
-
-.modal-header {
-    @apply p-6 border-b border-gray-200;
-}
-
-.modal-body {
-    @apply p-6;
-}
-
-.modal-footer {
-    @apply p-6 border-t border-gray-200 flex justify-end space-x-2;
+/* Inputs com ícones */
+.input-icon {
+    @apply absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500;
 }
 
 /* Responsividade */
 @media (max-width: 640px) {
-    .modal-content {
-        @apply m-4;
+    .section-card {
+        @apply p-4;
     }
+
+    .btn-primary {
+        @apply py-2 px-3 text-sm;
+    }
+}
+
+/* Animações de transição */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+/* Efeitos de hover */
+.hover-lift {
+    @apply transition-transform duration-200;
+}
+
+.hover-lift:hover {
+    @apply transform -translate-y-1;
+}
+
+/* Estilos para campos de formulário desabilitados */
+.form-input:disabled,
+.form-select:disabled {
+    @apply bg-gray-100 cursor-not-allowed;
+}
+
+/* Estilos para validação de formulário */
+.form-input.error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-200;
+}
+
+.error-message {
+    @apply text-sm text-red-500 mt-1;
+}
+
+/* Estilos para links */
+.link {
+    @apply text-blue-600 hover:text-blue-700 hover:underline transition-colors duration-200;
+}
+
+/* Estilos para badges */
+.badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-success {
+    @apply bg-green-100 text-green-800;
+}
+
+.badge-error {
+    @apply bg-red-100 text-red-800;
+}
+
+.badge-warning {
+    @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-info {
+    @apply bg-blue-100 text-blue-800;
 }

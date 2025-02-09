@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.30] - 2024-01-09
+### Adicionado
+- Implementação completa da página de configurações
+- Novos endpoints AJAX para gerenciamento de perfil do usuário
+- Sistema de preferências do usuário (tema escuro, notificações, etc.)
+- Validações de formulário aprimoradas
+- Feedback visual com toast notifications
+- Novos estilos CSS para componentes da interface
+
+### Alterado
+- Atualização do schema do banco de dados para suportar preferências do usuário
+- Melhorias na classe Usuario para gerenciar dados do perfil
+- Refatoração do código JavaScript para usar async/await
+- Aprimoramento da experiência do usuário na página de configurações
+
+### Corrigido
+- Validação de email duplicado ao atualizar perfil
+- Tratamento de erros nas requisições AJAX
+- Persistência das preferências do usuário
+
 ## [0.3.29] - 2025-02-09
 
 ### Removido
