@@ -109,5 +109,125 @@ class Lista {
 
         return $stmt->execute();
     }
+
+    // Listar listas do usuário com detalhes de itens
+    public function listarListasUsuario() {
+        $query = "SELECT 
+                    l.id, 
+                    l.nome, 
+                    l.descricao, 
+                    l.data_criacao,
+                    (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                     WHERE lista_id = l.id AND status = 'pendente') as itens_pendentes,
+                    (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                     WHERE lista_id = l.id AND status = 'concluido') as itens_concluidos,
+                    CASE 
+                        WHEN (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                              WHERE lista_id = l.id) = 0
+                        THEN 'vazia'
+                        WHEN (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                              WHERE lista_id = l.id) = 
+                             (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                              WHERE lista_id = l.id AND status = 'concluido')
+                        THEN 'concluida'
+                        ELSE 'em_andamento'
+                    END as status
+                  FROM " . $this->tabela_listas . " l
+                  WHERE l.usuario_id = :usuario_id 
+                  ORDER BY l.data_criacao DESC";
+
+        $stmt = $this->conexao->prepare($query);
+        $stmt->bindParam(":usuario_id", $this->usuario_id);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Obter detalhes da lista
+    public function obterDetalhesLista() {
+        $query = "SELECT l.id, l.nome, l.descricao, l.data_criacao, 
+                    (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                     WHERE lista_id = l.id) as total_itens
+                  FROM " . $this->tabela_listas . " l
+                  WHERE l.id = :id AND l.usuario_id = :usuario_id";
+
+        $stmt = $this->conexao->prepare($query);
+        $stmt->bindParam(":id", $this->id);
+        $stmt->bindParam(":usuario_id", $this->usuario_id);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Buscar itens da lista
+    public function buscarItensLista() {
+        $query = "SELECT id, nome, quantidade, unidade, status 
+                  FROM " . $this->tabela_itens . "
+                  WHERE lista_id = :lista_id
+                  ORDER BY status = 'pendente' DESC, nome ASC";
+
+        $stmt = $this->conexao->prepare($query);
+        $stmt->bindParam(":lista_id", $this->id);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Adicionar item à lista
+    public function adicionarItemLista($nome, $quantidade, $unidade) {
+        $query = "INSERT INTO " . $this->tabela_itens . " 
+                  SET lista_id = :lista_id, 
+                      nome = :nome, 
+                      quantidade = :quantidade, 
+                      unidade = :unidade,
+                      status = 'pendente'";
+
+        $stmt = $this->conexao->prepare($query);
+
+        // Limpar e validar dados
+        $nome = htmlspecialchars(strip_tags($nome));
+        $unidade = htmlspecialchars(strip_tags($unidade));
+
+        $stmt->bindParam(":lista_id", $this->id);
+        $stmt->bindParam(":nome", $nome);
+        $stmt->bindParam(":quantidade", $quantidade);
+        $stmt->bindParam(":unidade", $unidade);
+
+        if($stmt->execute()) {
+            return $this->conexao->lastInsertId();
+        }
+
+        return false;
+    }
+
+    // Atualizar status do item
+    public function atualizarStatusItem($item_id, $status) {
+        $query = "UPDATE " . $this->tabela_itens . " 
+                  SET status = :status 
+                  WHERE id = :item_id AND lista_id = :lista_id";
+
+        $stmt = $this->conexao->prepare($query);
+
+        $status = ($status == 'concluido') ? 'concluido' : 'pendente';
+
+        $stmt->bindParam(":status", $status);
+        $stmt->bindParam(":item_id", $item_id);
+        $stmt->bindParam(":lista_id", $this->id);
+
+        return $stmt->execute();
+    }
+
+    // Remover item da lista
+    public function removerItem($item_id) {
+        $query = "DELETE FROM " . $this->tabela_itens . " 
+                  WHERE id = :item_id AND lista_id = :lista_id";
+
+        $stmt = $this->conexao->prepare($query);
+
+        $stmt->bindParam(":item_id", $item_id);
+        $stmt->bindParam(":lista_id", $this->id);
+
+        return $stmt->execute();
+    }
 }
 ?>

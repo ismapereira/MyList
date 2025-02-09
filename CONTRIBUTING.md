@@ -1,55 +1,85 @@
-# 🤝 Contribuindo para o MyList
+# 🤝 Guia de Contribuição para MyList
 
-Primeiramente, obrigado por considerar contribuir para o MyList! 🎉
+## 🌟 Bem-vindo(a)!
 
-## 🌈 Como Posso Contribuir?
+Agradecemos seu interesse em contribuir para o MyList! Este documento fornece diretrizes para contribuição.
 
-### 🐛 Reportando Bugs
-- Verifique se o bug já não foi reportado
-- Abra uma nova issue com um título claro
-- Descreva detalhadamente o bug
-- Inclua passos para reproduzir, comportamento esperado e atual
+## 📋 Processo de Contribuição
 
-### ✨ Sugerindo Melhorias
-- Abra uma issue descrevendo sua sugestão
-- Explique o benefício da melhoria
-- Forneça exemplos de como implementar
+### 1. Abra uma Issue
 
-### 🚀 Processo de Pull Request
+- Verifique se já não existe uma issue similar
+- Descreva claramente o problema ou melhoria
+- Use labels apropriadas
+
+### 2. Fork e Desenvolvimento
+
 1. Faça um fork do repositório
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
+2. Crie uma branch para sua feature
+   ```bash
+   git checkout -b feature/nome-da-feature
+   ```
+3. Faça commits concisos e significativos
+   ```bash
+   git commit -m "Adiciona: descrição clara da mudança"
+   ```
 
-## 🛠 Ambiente de Desenvolvimento
+### 3. Padrões de Código
+
+- Siga as PSRs do PHP
+- Use indentação de 4 espaços
+- Mantenha linhas com no máximo 120 caracteres
+- Adicione comentários explicativos quando necessário
+
+### 4. Testes
+
+- Adicione testes para novas funcionalidades
+- Garanta que todos os testes passem antes de submeter
+
+### 5. Pull Request
+
+- Descreva detalhadamente as mudanças
+- Referencie issues relacionadas
+- Aguarde revisão da equipe
+
+## 🛠️ Ambiente de Desenvolvimento
 
 ### Requisitos
-- PHP 8.0+
+
+- PHP 7.4+
 - MySQL 5.7+
 - Composer
 - Git
 
 ### Configuração Local
-```bash
-# Clone o repositório
-git clone https://github.com/seuusuario/mylist.git
 
-# Instale dependências
-composer install
+1. Clone o repositório
+2. Instale dependências
+   ```bash
+   composer install
+   ```
+3. Configure o banco de dados
+4. Execute testes
+   ```bash
+   ./vendor/bin/phpunit
+   ```
 
-# Configure o banco de dados
-cp config/database.example.php config/database.php
-# Edite com suas credenciais
-```
+## 🐛 Reportando Bugs
 
-## 📋 Diretrizes de Código
-- Siga PSR-12 para padrões de código PHP
-- Escreva testes para novas funcionalidades
-- Mantenha a documentação atualizada
-- Faça commits pequenos e significativos
+- Use o template de issue de bug
+- Forneça passos para reproduzir
+- Inclua versões de PHP, MySQL e navegador
 
-## 🤔 Dúvidas?
-Entre em contato através das issues do GitHub.
+## 📜 Código de Conduta
 
-🌟 Obrigado por contribuir!
+- Seja respeitoso
+- Colabore construtivamente
+- Mantenha um ambiente inclusivo
+
+## 🏆 Reconhecimento
+
+Contribuidores serão listados nos créditos do projeto!
+
+---
+
+**Última atualização:** Fevereiro 2025

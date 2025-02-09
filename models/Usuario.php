@@ -64,5 +64,35 @@ class Usuario {
 
         return false;
     }
+
+    // Método para buscar usuário por ID
+    public function obterPorId() {
+        $query = "SELECT id, nome, email FROM " . $this->tabela . " WHERE id = :id LIMIT 0,1";
+
+        $stmt = $this->conexao->prepare($query);
+        $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $linha = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if($linha) {
+            $this->nome = $linha['nome'];
+            $this->email = $linha['email'];
+            return true;
+        }
+
+        return false;
+    }
+
+    // Método para verificar se o email já existe
+    public function emailExiste() {
+        $query = "SELECT COUNT(*) FROM " . $this->tabela . " WHERE email = :email";
+
+        $stmt = $this->conexao->prepare($query);
+        $stmt->bindParam(":email", $this->email);
+        $stmt->execute();
+
+        return $stmt->fetchColumn() > 0;
+    }
 }
 ?>

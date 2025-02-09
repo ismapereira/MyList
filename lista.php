@@ -1,123 +1,194 @@
 <?php
 session_start();
-
-// Verificar se o usuário está logado
-if(!isset($_SESSION['usuario_id'])) {
-    header("Location: login.php");
-    exit();
-}
-
+require_once 'config/database.php';
 require_once 'models/Lista.php';
 
-// Verificar se um ID de lista foi passado
-if(!isset($_GET['id'])) {
-    header("Location: dashboard.php");
+// Verificar autenticação
+if(!isset($_SESSION['usuario_id'])) {
+    header('Location: login.php');
     exit();
 }
 
-$lista_id = intval($_GET['id']);
-$lista_model = new Lista();
-$lista_model->id = $lista_id;
+// Verificar se ID da lista foi passado
+if(!isset($_GET['id']) || empty($_GET['id'])) {
+    header('Location: dashboard.php');
+    exit();
+}
+
+// Inicializar lista
+$lista = new Lista();
+$lista->id = $_GET['id'];
+$lista->usuario_id = $_SESSION['usuario_id'];
+
+// Buscar detalhes da lista
+$detalhesLista = $lista->obterDetalhesLista();
+if(!$detalhesLista) {
+    header('Location: dashboard.php');
+    exit();
+}
 
 // Buscar itens da lista
-$itens = $lista_model->buscarItens();
+$itens = $lista->buscarItens();
 ?>
-
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <title>Lista de Compras</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/lista.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($detalhesLista['nome']); ?> - MyList</title>
+    <link href="assets/css/tailwind.min.css" rel="stylesheet">
+    <link href="assets/css/custom.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="dashboard.php">MyList</a>
-            <div class="navbar-nav ml-auto">
-                <span class="navbar-text mr-3">
-                    Olá, <?php echo $_SESSION['usuario_nome']; ?>
-                </span>
-                <a href="logout.php" class="btn btn-outline-danger">Sair</a>
+<body class="bg-gray-50 antialiased">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-xl p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">
+                        <?php echo htmlspecialchars($detalhesLista['nome']); ?>
+                    </h1>
+                    <p class="text-gray-600">
+                        <?php echo htmlspecialchars($detalhesLista['descricao'] ?? 'Sem descrição'); ?>
+                    </p>
+                </div>
+                <a href="dashboard.php" class="text-blue-600 hover:text-blue-800">
+                    <i data-feather="arrow-left" class="w-6 h-6"></i>
+                </a>
             </div>
-        </div>
-    </nav>
 
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3>Lista de Compras</h3>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#adicionarItemModal">
-                            Adicionar Item
-                        </button>
+            <!-- Adicionar Item -->
+            <form id="adicionarItemForm" class="mb-6 flex space-x-2">
+                <input 
+                    type="text" 
+                    id="nomeItem" 
+                    placeholder="Nome do item" 
+                    required 
+                    class="flex-grow px-4 py-2 rounded-lg bg-gray-100 border focus:border-blue-500 focus:outline-none"
+                >
+                <input 
+                    type="number" 
+                    id="quantidadeItem" 
+                    placeholder="Qtd" 
+                    min="0.1" 
+                    step="0.1" 
+                    required 
+                    class="w-24 px-4 py-2 rounded-lg bg-gray-100 border focus:border-blue-500 focus:outline-none"
+                >
+                <select 
+                    id="unidadeItem" 
+                    required 
+                    class="w-32 px-4 py-2 rounded-lg bg-gray-100 border focus:border-blue-500 focus:outline-none"
+                >
+                    <option value="un">Unidade</option>
+                    <option value="kg">Kg</option>
+                    <option value="g">Gramas</option>
+                    <option value="l">Litros</option>
+                    <option value="ml">Mililitros</option>
+                </select>
+                <button 
+                    type="submit" 
+                    class="btn-primary px-4 py-2 rounded-lg flex items-center space-x-2"
+                >
+                    <i data-feather="plus" class="w-5 h-5"></i>
+                    <span>Adicionar</span>
+                </button>
+            </form>
+
+            <!-- Lista de Itens -->
+            <div id="listaItens" class="space-y-2">
+                <?php if(empty($itens)): ?>
+                    <div class="text-center text-gray-500 py-4">
+                        Nenhum item na lista
                     </div>
-                    <div class="card-body">
-                        <ul class="list-group" id="lista-itens">
-                            <?php foreach($itens as $item): ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" 
-                                               data-item-id="<?php echo $item['id']; ?>"
-                                               <?php echo $item['comprado'] ? 'checked' : ''; ?>>
-                                        <label class="form-check-label <?php echo $item['comprado'] ? 'text-muted' : ''; ?>">
-                                            <?php echo htmlspecialchars($item['nome']); ?> 
-                                            (<?php echo $item['quantidade'] . ' ' . $item['unidade']; ?>)
-                                        </label>
-                                    </div>
-                                    <button class="btn btn-sm btn-danger remover-item" data-item-id="<?php echo $item['id']; ?>">
-                                        Remover
-                                    </button>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
+                <?php else: ?>
+                    <?php foreach($itens as $item): ?>
+                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <input 
+                                    type="checkbox" 
+                                    class="item-checkbox" 
+                                    data-item-id="<?php echo $item['id']; ?>"
+                                    <?php echo $item['status'] == 'concluido' ? 'checked' : ''; ?>
+                                >
+                                <span class="<?php echo $item['status'] == 'concluido' ? 'line-through text-gray-500' : ''; ?>">
+                                    <?php echo htmlspecialchars($item['nome']); ?>
+                                </span>
+                            </div>
+                            <div class="text-gray-600">
+                                <?php echo $item['quantidade'] . ' ' . $item['unidade']; ?>
+                                <button class="ml-2 text-red-500 hover:text-red-700 excluir-item" data-item-id="<?php echo $item['id']; ?>">
+                                    <i data-feather="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <!-- Resumo da Lista -->
+            <div class="mt-6 pt-4 border-t flex justify-between items-center">
+                <div>
+                    <span class="text-gray-600">Total de itens:</span>
+                    <span id="totalItens" class="font-bold"><?php echo count($itens); ?></span>
+                </div>
+                <div>
+                    <span class="text-gray-600">Itens comprados:</span>
+                    <span id="itensConcluidos" class="font-bold">
+                        <?php 
+                        $concluidos = array_filter($itens, function($item) {
+                            return $item['status'] == 'concluido';
+                        });
+                        echo count($concluidos); 
+                        ?>
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Adicionar Item -->
-    <div class="modal fade" id="adicionarItemModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Adicionar Item</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formulario-adicionar-item">
-                        <input type="hidden" name="lista_id" value="<?php echo $lista_id; ?>">
-                        <div class="mb-3">
-                            <label for="nome-item" class="form-label">Nome do Item</label>
-                            <input type="text" class="form-control" id="nome-item" name="nome" required>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="quantidade-item" class="form-label">Quantidade</label>
-                                <input type="number" class="form-control" id="quantidade-item" name="quantidade" value="1" min="0.1" step="0.1" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="unidade-item" class="form-label">Unidade</label>
-                                <select class="form-select" id="unidade-item" name="unidade">
-                                    <option value="un">Unidade</option>
-                                    <option value="kg">Kg</option>
-                                    <option value="g">g</option>
-                                    <option value="ml">ml</option>
-                                    <option value="L">L</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Adicionar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <script>
+        // Inicializar ícones Feather
+        feather.replace();
 
-    <script src="assets/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/lista.js"></script>
+        // Adicionar item
+        document.getElementById('adicionarItemForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nome = document.getElementById('nomeItem').value.trim();
+            const quantidade = document.getElementById('quantidadeItem').value;
+            const unidade = document.getElementById('unidadeItem').value;
+
+            if (nome && quantidade && unidade) {
+                // Aqui você faria uma chamada AJAX para adicionar o item
+                alert(`Item adicionado: ${nome} (${quantidade} ${unidade})`);
+                
+                // Limpar formulário
+                document.getElementById('nomeItem').value = '';
+                document.getElementById('quantidadeItem').value = '';
+                document.getElementById('unidadeItem').value = 'un';
+            }
+        });
+
+        // Marcar/desmarcar item
+        document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const itemId = this.dataset.itemId;
+                const status = this.checked ? 'concluido' : 'pendente';
+                
+                // Aqui você faria uma chamada AJAX para atualizar o status
+                alert(`Item ${itemId} marcado como ${status}`);
+            });
+        });
+
+        // Excluir item
+        document.querySelectorAll('.excluir-item').forEach(botao => {
+            botao.addEventListener('click', function() {
+                const itemId = this.dataset.itemId;
+                
+                // Aqui você faria uma chamada AJAX para excluir o item
+                alert(`Excluir item ${itemId}`);
+            });
+        });
+    </script>
 </body>
 </html>

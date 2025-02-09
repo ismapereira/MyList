@@ -1,113 +1,74 @@
-# 🛒 MyList - Seu Gerenciador Inteligente de Compras
+# MyList 🛒 - Gerenciador de Listas de Compras
 
-![PHP Version](https://img.shields.io/badge/PHP-8.0+-blueviolet?style=for-the-badge&logo=php)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![AI Assisted](https://img.shields.io/badge/AI_Assisted-Development-purple?style=for-the-badge&logo=artificial-intelligence)
+## 📝 Descrição do Projeto
 
-## 🤖 Projeto No-Code & Desenvolvimento Assistido por IA
+MyList é uma aplicação web moderna para gerenciamento de listas de compras, permitindo que usuários criem, organizem e acompanhem suas compras de forma simples e intuitiva.
 
-**Nota Importante:** Este projeto é um exercício de desenvolvimento de software utilizando assistência de Inteligência Artificial (IA). Foi criado como parte de um processo de aprendizado e prática de engenharia de prompts, demonstrando como ferramentas de IA podem auxiliar no desenvolvimento de aplicações web.
+## ✨ Recursos Principais
 
-### 🌟 Características do Desenvolvimento
-- **Metodologia:** Desenvolvimento assistido por IA
-- **Ferramenta Principal:** Assistente de IA para geração de código
-- **Objetivo:** Prática de engenharia de prompts e desenvolvimento de software
-- **Limitações:** Código gerado requer revisão e ajustes manuais
-
-### 🎯 Propósito do Projeto
-- Explorar capacidades de desenvolvimento com IA
-- Demonstrar potencial de assistentes de código
-- Praticar técnicas de prompt engineering
-- Criar uma aplicação funcional como resultado
-
-## 🌟 Sobre o Projeto
-
-MyList é uma aplicação web moderna e intuitiva para gerenciamento de listas de compras, projetada para simplificar sua experiência de compras.
-
-### ✨ Funcionalidades Principais
-
-- 📋 Criação de listas de compras personalizadas
-- ✅ Marcação de itens comprados
-- 📱 Interface responsiva e moderna
-- 🔒 Sistema de autenticação de usuários
-- 📊 Controle detalhado de itens e quantidades
+- 🔐 Autenticação de usuários
+- 📋 Criação e gerenciamento de listas de compras
+- ✅ Marcação de itens como comprados
+- 📊 Estatísticas de listas e itens
+- 📱 Design responsivo e moderno
 
 ## 🚀 Tecnologias Utilizadas
 
-- **Backend:** PHP 8.0+
+- **Backend:** PHP 7.4+
+- **Frontend:** HTML5, Tailwind CSS
 - **Banco de Dados:** MySQL
-- **Frontend:** Tailwind CSS, HTML5
-- **Arquitetura:** MVC
+- **Dependências:** PDO, Feather Icons
 
-## 🔧 Instalação e Configuração
+## 🛠️ Configuração do Ambiente
 
 ### Pré-requisitos
 
-- PHP 8.0 ou superior
-- MySQL 5.7+
+- PHP 7.4 ou superior
+- MySQL 5.7 ou superior
 - Servidor web (Apache/Nginx)
-- Composer
+- Composer (opcional, para gerenciamento de dependências)
 
-### Passos de Instalação
+### Instalação
 
 1. Clone o repositório
-```bash
-git clone https://github.com/seuusuario/mylist.git
+2. Configure as credenciais de banco de dados em `config/database.php`
+3. Importe o schema do banco de dados em `config/schema.sql`
+4. Inicie seu servidor web
+
+## 📦 Estrutura do Projeto
+
+```
+mylist/
+├── assets/
+│   ├── css/
+│   └── js/
+├── config/
+│   ├── database.php
+│   └── schema.sql
+├── models/
+│   ├── Usuario.php
+│   └── Lista.php
+├── dashboard.php
+├── lista.php
+├── login.php
+└── registro.php
 ```
 
-2. Instale as dependências
-```bash
-composer install
-```
+## 🔧 Próximas Melhorias
 
-3. Configure o banco de dados
-- Copie `config/database.example.php` para `config/database.php`
-- Edite com suas credenciais de banco de dados
-
-4. Importe o schema
-```bash
-mysql -u seuusuario -p mylist_db < config/schema.sql
-```
-
-## 🤝 Contribuição
-
-Contribuições são bem-vindas! Por favor, leia as diretrizes de contribuição antes de começar.
-
-1. Faça um fork do projeto
-2. Crie sua branch de feature (`git checkout -b feature/NovaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona NovaFeature'`)
-4. Push para a branch (`git push origin feature/NovaFeature`)
-5. Abra um Pull Request
-
-## 📸 Screenshots
-
-[Espaço para screenshots do projeto]
-
-## 📋 Roadmap
-
-- [ ] Modo escuro
-- [ ] Integração com APIs de mercados
+- [ ] Implementação de AJAX para operações sem recarregamento
 - [ ] Exportação de listas
 - [ ] Compartilhamento de listas
+- [ ] Integração com APIs de mercados
 
-## 🔒 Segurança
+## 🤝 Contribuições
 
-- Autenticação de usuários
-- Proteção contra injeção SQL
-- Sanitização de inputs
+Consulte `CONTRIBUTING.md` para detalhes sobre como contribuir para o projeto.
 
 ## 📄 Licença
 
-Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
+Este projeto está sob licença MIT. Veja `LICENSE` para mais detalhes.
 
 ## 📞 Contato
 
-Ismael Pereira - [ismaelpereirafeitosa@hotmail.com](mailto:ismaelpereirafeitosa@hotmail.com)
-
-Projeto Link: [https://github.com/ismapereira/mylist](https://github.com/ismapereira/mylist)
-
----
-
-🌈 **Desenvolvido com ❤️ por Ismael**
+Desenvolvido com ❤️ por [Seu Nome/Organização]

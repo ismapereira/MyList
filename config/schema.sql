@@ -28,6 +28,6 @@ CREATE TABLE itens_lista (
     nome VARCHAR(100) NOT NULL,
     quantidade DECIMAL(10,2) DEFAULT 1,
     unidade VARCHAR(20) DEFAULT 'un',
-    comprado BOOLEAN DEFAULT FALSE,
+    status ENUM('pendente', 'concluido') DEFAULT 'pendente',
     FOREIGN KEY (lista_id) REFERENCES listas(id) ON DELETE CASCADE
 );
