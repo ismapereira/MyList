@@ -181,4 +181,4 @@ Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
 Desenvolvido por Ismael Pereira com auxílio de Inteligência Artificial
 
 ---
- (&copy;) 2025 MyList. Todos os direitos reservados.
+ &copy;2025 MyList. Todos os direitos reservados.
