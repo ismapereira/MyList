@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+### Added
+- Funcionalidade de exportar lista de compras para PDF
+- Adicionado botão de exportação na interface da lista
+- Integração com biblioteca TCPDF para geração de PDFs
+
 ## [0.3.33] - 2024-01-09
 ### Adicionado
 - Modo escuro (Dark Mode) completo e elegante

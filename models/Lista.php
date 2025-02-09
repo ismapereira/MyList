@@ -565,5 +565,33 @@ class Lista {
             throw new Exception("Erro ao editar lista: " . $e->getMessage());
         }
     }
+
+    // Método para obter todos os itens de uma lista específica
+    public function getItensByListaId($lista_id) {
+        $query = "SELECT i.*, COALESCE(i.comprado, 0) as comprado 
+                 FROM " . $this->tabela_itens_privada . " i 
+                 WHERE i.lista_id = :lista_id 
+                 ORDER BY i.comprado ASC, i.nome ASC";
+        
+        $stmt = $this->conexao->prepare($query);
+        $stmt->bindParam(':lista_id', $lista_id);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Método para obter uma lista específica por ID
+    public function getListaById($lista_id) {
+        $query = "SELECT l.*, u.nome as nome_usuario 
+                 FROM " . $this->tabela_listas . " l 
+                 LEFT JOIN usuarios u ON l.usuario_id = u.id 
+                 WHERE l.id = :lista_id";
+        
+        $stmt = $this->conexao->prepare($query);
+        $stmt->bindParam(':lista_id', $lista_id);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>

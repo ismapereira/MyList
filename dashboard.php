@@ -115,31 +115,27 @@ $listas = $lista->listarListasUsuario();
                         </div>
                     <?php else: ?>
                         <?php foreach($listas as $lista): ?>
-                            <div class="bg-white p-4 rounded-xl shadow-md flex justify-between items-center hover:shadow-lg transition">
-                                <div>
-                                    <div class="flex items-center space-x-2">
-                                        <h3 class="font-semibold text-gray-800"><?php echo htmlspecialchars($lista['nome']); ?></h3>
-                                        <span class="text-xs text-gray-500">
-                                            <?php 
-                                            $data = new DateTime($lista['data_criacao']);
-                                            echo $data->format('d/m/Y');
-                                            ?>
-                                        </span>
+                            <div class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition">
+                                <div class="flex flex-col space-y-2">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex flex-col">
+                                            <h3 class="text-lg font-semibold text-gray-900"><?php echo htmlspecialchars($lista['nome']); ?></h3>
+                                            <p class="text-sm text-gray-500">
+                                                <?php echo $lista['itens_pendentes']; ?> itens pendentes
+                                            </p>
+                                        </div>
+                                        <div class="flex items-center space-x-4">
+                                            <a href="lista.php?id=<?php echo $lista['id']; ?>" class="text-blue-600 hover:text-blue-800" title="Editar">
+                                                <i data-feather="edit" class="w-5 h-5"></i>
+                                            </a>
+                                            <a href="export_pdf.php?lista_id=<?php echo $lista['id']; ?>" class="text-blue-600 hover:text-blue-800" title="Exportar PDF">
+                                                <i data-feather="file-text" class="w-5 h-5"></i>
+                                            </a>
+                                            <button class="text-red-600 hover:text-red-800 excluir-lista" data-lista-id="<?php echo $lista['id']; ?>" title="Excluir">
+                                                <i data-feather="trash-2" class="w-5 h-5"></i>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <p class="text-sm text-gray-500">
-                                        <?php echo $lista['itens_pendentes']; ?> itens pendentes
-                                    </p>
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <a href="lista.php?id=<?php echo $lista['id']; ?>" class="text-blue-600 hover:text-blue-800">
-                                        <i data-feather="edit" class="w-5 h-5"></i>
-                                    </a>
-                                    <button 
-                                        class="text-red-600 hover:text-red-800 excluir-lista" 
-                                        data-lista-id="<?php echo $lista['id']; ?>"
-                                    >
-                                        <i data-feather="trash-2" class="w-5 h-5"></i>
-                                    </button>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -280,32 +276,33 @@ $listas = $lista->listarListasUsuario();
                     // Adicionar listas
                     data.listas.forEach(lista => {
                         const novaLista = document.createElement('div');
-                        novaLista.className = 'bg-white p-4 rounded-xl shadow-md flex justify-between items-center hover:shadow-lg transition';
+                        novaLista.className = 'bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition';
                         
                         // Formatar data
                         const data = new Date(lista.data_criacao);
                         const dataFormatada = data.toLocaleDateString('pt-BR');
 
                         novaLista.innerHTML = `
-                            <div>
-                                <div class="flex items-center space-x-2">
-                                    <h3 class="font-semibold text-gray-800">${lista.nome}</h3>
-                                    <span class="text-xs text-gray-500">${dataFormatada}</span>
+                            <div class="flex flex-col space-y-2">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex flex-col">
+                                        <h3 class="text-lg font-semibold text-gray-900">${lista.nome}</h3>
+                                        <p class="text-sm text-gray-500">
+                                            ${lista.itens_pendentes} itens pendentes
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-4">
+                                        <a href="lista.php?id=${lista.id}" class="text-blue-600 hover:text-blue-800" title="Editar">
+                                            <i data-feather="edit" class="w-5 h-5"></i>
+                                        </a>
+                                        <a href="export_pdf.php?lista_id=${lista.id}" class="text-blue-600 hover:text-blue-800" title="Exportar PDF">
+                                            <i data-feather="file-text" class="w-5 h-5"></i>
+                                        </a>
+                                        <button class="text-red-600 hover:text-red-800 excluir-lista" data-lista-id="${lista.id}" title="Excluir">
+                                            <i data-feather="trash-2" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <p class="text-sm text-gray-500">
-                                    ${lista.itens_pendentes} itens pendentes
-                                </p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <a href="lista.php?id=${lista.id}" class="text-blue-600 hover:text-blue-800">
-                                    <i data-feather="edit" class="w-5 h-5"></i>
-                                </a>
-                                <button 
-                                    class="text-red-600 hover:text-red-800 excluir-lista" 
-                                    data-lista-id="${lista.id}"
-                                >
-                                    <i data-feather="trash-2" class="w-5 h-5"></i>
-                                </button>
                             </div>
                         `;
                         
