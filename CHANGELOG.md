@@ -9,6 +9,13 @@
 - Exportação de PDF com design profissional e minimalista
 - Correções de bugs e melhorias de performance
 
+### Desenvolvimento com IA
+- Projeto desenvolvido com auxílio de Inteligência Artificial
+- Implementação de técnicas modernas de no-code
+- Utilização de prompts especializados para desenvolvimento
+- Documentação mantida e atualizada com IA
+- Código otimizado seguindo boas práticas sugeridas por IA
+
 ### Recursos Principais
 - Sistema completo de autenticação de usuários
 - Criação e gerenciamento de múltiplas listas
