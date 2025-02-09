@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.33] - 2024-01-09
+### Adicionado
+- Modo escuro (Dark Mode) completo e elegante
+  - Suporte a preferências de sistema
+  - Persistência de preferência via localStorage
+  - Transições suaves entre modos claro e escuro
+  - Estilos personalizados para diversos componentes
+  - Botão de toggle na sidebar
+
+### Modificado
+- Estilos de componentes adaptados para dark mode
+- Adicionado script de gerenciamento de tema
+
 ## [0.3.32] - 2024-01-09
 ### Adicionado
 - Sidebar responsiva para dispositivos móveis

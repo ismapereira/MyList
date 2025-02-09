@@ -18,10 +18,20 @@
             <i data-feather="settings" class="w-5 h-5"></i>
             <span>Configurações</span>
         </a>
+        <hr class="my-4 border-gray-200">
+        
         <a href="logout.php" class="flex items-center space-x-3 text-red-600 p-2 hover:bg-red-50 rounded-lg transition">
             <i data-feather="log-out" class="w-5 h-5"></i>
             <span>Sair</span>
         </a>
+
+        <hr class="my-4 border-gray-200">
+        
+        <div class="flex items-center justify-center">
+            <button id="dark-mode-toggle" class="dark-mode-toggle">
+                <i data-feather="moon" class="w-5 h-5"></i>
+            </button>
+        </div>
     </nav>
 </aside>
 
@@ -64,3 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
+<!-- Script para Dark Mode -->
+<script src="assets/js/dark-mode.js"></script>

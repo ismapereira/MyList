@@ -46,9 +46,30 @@ body {
     @apply transform -translate-y-0.5 shadow-lg;
 }
 
+.dark .btn-primary {
+    background-color: #3B82F6;
+    color: #ffffff;
+    border: none;
+}
+
+.dark .btn-primary:hover {
+    background-color: #2563EB;
+}
+
 /* Formulários */
 .form-input {
     @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition-all duration-200;
+}
+
+.dark .form-input {
+    background-color: #1E1E1E;
+    border-color: #374151;
+    color: #E5E7EB;
+}
+
+.dark .form-input:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 .form-select {
@@ -75,6 +96,18 @@ input:checked + .toggle-switch::after {
 
 input:focus + .toggle-switch {
     @apply ring-2 ring-blue-200;
+}
+
+.dark .toggle-switch {
+    background-color: #374151;
+}
+
+.dark .toggle-switch:before {
+    background-color: #E5E7EB;
+}
+
+.dark input:checked + .toggle-switch {
+    background-color: #3B82F6;
 }
 
 /* Spinner de carregamento */
@@ -138,6 +171,14 @@ input:focus + .toggle-switch {
     @apply bg-white p-6 rounded-xl shadow-md transition-all duration-200;
 }
 
+.dark .bg-gray-50 {
+    background-color: #1E1E1E;
+}
+
+.dark .bg-white {
+    background-color: #1E1E1E;
+}
+
 .section-card:hover {
     @apply shadow-lg;
 }
@@ -149,6 +190,10 @@ input:focus + .toggle-switch {
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: none;
+}
+
+.dark .feather {
+    stroke: currentColor;
 }
 
 /* Inputs com ícones */
@@ -264,4 +309,156 @@ input:focus + .toggle-switch {
 
 #sidebar.animate-slide-out {
     animation: slideOut 0.3s ease-in;
+}
+
+/* Dark Mode Base */
+.dark {
+    color-scheme: dark;
+}
+
+.dark body {
+    background-color: #121212;
+    color: #E5E7EB;
+}
+
+/* Dark Mode Typography */
+.dark h1, 
+.dark h2, 
+.dark h3, 
+.dark h4, 
+.dark h5, 
+.dark h6 {
+    color: #F5F5F5;
+}
+
+.dark .text-gray-900 { color: #F5F5F5; }
+.dark .text-gray-800 { color: #F3F4F6; }
+.dark .text-gray-700 { color: #E5E7EB; }
+.dark .text-gray-600 { color: #D1D5DB; }
+.dark .text-gray-500 { color: #9CA3AF; }
+.dark .text-gray-400 { color: #6B7280; }
+
+/* Dark Mode Backgrounds */
+.dark .bg-gray-900 { background-color: #111827; }
+.dark .bg-gray-800 { background-color: #1F2937; }
+.dark .bg-gray-700 { background-color: #374151; }
+.dark .bg-gray-600 { background-color: #4B5563; }
+.dark .bg-gray-100 { background-color: #1a1a1a; }
+.dark .bg-gray-50 { background-color: #171717; }
+.dark .bg-white { background-color: #1E1E1E; }
+
+/* Dark Mode Borders */
+.dark .border-gray-300 { border-color: #374151; }
+.dark .border-gray-200 { border-color: #2D3748; }
+.dark .border-gray-100 { border-color: #243244; }
+
+/* Dark Mode Forms */
+.dark .form-input {
+    background-color: #1E1E1E;
+    border-color: #374151;
+    color: #E5E7EB;
+}
+
+.dark .form-input:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.dark .form-input::placeholder {
+    color: #6B7280;
+}
+
+/* Dark Mode Buttons */
+.dark .btn-primary {
+    background-color: #3B82F6;
+    color: #ffffff;
+    border: none;
+}
+
+.dark .btn-primary:hover {
+    background-color: #2563EB;
+}
+
+/* Dark Mode Toggle Switch */
+.dark .toggle-switch {
+    background-color: #374151;
+}
+
+.dark .toggle-switch:before {
+    background-color: #E5E7EB;
+}
+
+.dark input:checked + .toggle-switch {
+    background-color: #3B82F6;
+}
+
+/* Dark Mode Cards & Sections */
+.dark .section-card {
+    background-color: #1E1E1E;
+    border-color: #2D3748;
+}
+
+.dark .section-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark Mode Hover States */
+.dark .hover\:bg-gray-100:hover {
+    background-color: #2D3748;
+}
+
+.dark .hover\:bg-blue-50:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Dark Mode Icons */
+.dark .feather {
+    stroke: currentColor;
+}
+
+/* Dark Mode Toast Notifications */
+.dark .toast {
+    background-color: #2C2C2C;
+    border-color: #374151;
+}
+
+.dark .toast-success {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: #34D399;
+}
+
+.dark .toast-error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #F87171;
+}
+
+/* Dark Mode Danger Zone */
+.dark .bg-red-50 {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.dark .text-red-600 {
+    color: #EF4444;
+}
+
+.dark .text-red-500 {
+    color: #F87171;
+}
+
+.dark .border-red-100 {
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* Dark Mode Shadows */
+.dark .shadow-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark Mode Focus States */
+.dark .focus\:ring-blue-200:focus {
+    --tw-ring-color: rgba(59, 130, 246, 0.2);
+}
+
+.dark .focus\:border-blue-500:focus {
+    border-color: #3B82F6;
 }
