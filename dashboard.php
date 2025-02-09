@@ -5,20 +5,23 @@ require_once 'models/Lista.php';
 require_once 'models/Usuario.php';
 
 // Verificar autenticação
-if(!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
 }
 
 // Recuperar informações do usuário
 $usuario = new Usuario();
-$usuario->id = $_SESSION['usuario_id'];
+$usuario->id = $_SESSION['user_id'];
 $usuario->obterPorId();
 
 // Recuperar listas do usuário
 $lista = new Lista();
-$lista->usuario_id = $_SESSION['usuario_id'];
+$lista->usuario_id = $_SESSION['user_id'];
 $listas = $lista->listarListasUsuario();
+
+error_log("Dashboard - User ID: " . $_SESSION['user_id']);
+error_log("Listas encontradas: " . print_r($listas, true));
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" class="scroll-smooth">

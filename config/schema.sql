@@ -29,10 +29,15 @@ CREATE TABLE itens_lista (
     nome VARCHAR(100) NOT NULL,
     quantidade DECIMAL(10,2) DEFAULT 1,
     unidade VARCHAR(20) DEFAULT 'un',
-    status ENUM('pendente', 'concluido') DEFAULT 'pendente',
+    comprado TINYINT(1) DEFAULT 0,
     FOREIGN KEY (lista_id) REFERENCES listas(id) ON DELETE CASCADE
 );
 
--- Script de atualização para adicionar coluna de preferências (se necessário)
+-- Scripts de atualização
 ALTER TABLE usuarios
 ADD COLUMN IF NOT EXISTS preferencias JSON DEFAULT NULL;
+
+-- Atualizar estrutura da tabela itens_lista
+ALTER TABLE itens_lista
+DROP COLUMN IF EXISTS status,
+ADD COLUMN IF NOT EXISTS comprado TINYINT(1) DEFAULT 0;

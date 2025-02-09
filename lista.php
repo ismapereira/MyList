@@ -4,31 +4,39 @@ require_once 'config/database.php';
 require_once 'models/Lista.php';
 
 // Verificar autenticação
-if(!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['user_id'])) {
+    error_log("Usuário não autenticado tentando acessar lista.php");
     header('Location: login.php');
     exit();
 }
 
 // Verificar se ID da lista foi passado
-if(!isset($_GET['id']) || empty($_GET['id'])) {
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+    error_log("Tentativa de acesso à lista.php sem ID");
     header('Location: dashboard.php');
     exit();
 }
 
+error_log("Acessando lista.php - ID: " . $_GET['id'] . " - Usuário: " . $_SESSION['user_id']);
+
 // Inicializar lista
 $lista = new Lista();
 $lista->id = $_GET['id'];
-$lista->usuario_id = $_SESSION['usuario_id'];
+$lista->usuario_id = $_SESSION['user_id'];
 
 // Buscar detalhes da lista
 $detalhesLista = $lista->obterDetalhesLista();
-if(!$detalhesLista) {
+error_log("Detalhes da lista: " . print_r($detalhesLista, true));
+
+if (!$detalhesLista || $detalhesLista['usuario_id'] != $_SESSION['user_id']) {
+    error_log("Lista não encontrada ou sem permissão - ID: " . $_GET['id'] . " - Usuário: " . $_SESSION['user_id']);
     header('Location: dashboard.php');
     exit();
 }
 
 // Buscar itens da lista
 $itens = $lista->buscarItens();
+error_log("Itens da lista: " . print_r($itens, true));
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" class="scroll-smooth">
@@ -99,7 +107,7 @@ $itens = $lista->buscarItens();
             <div id="listaItens" class="space-y-2">
                 <?php if(empty($itens)): ?>
                     <div class="text-center text-gray-500 py-4">
-                        Nenhum item na lista
+                        Nenhum item adicionado ainda
                     </div>
                 <?php else: ?>
                     <?php foreach($itens as $item): ?>
@@ -109,15 +117,17 @@ $itens = $lista->buscarItens();
                                     type="checkbox" 
                                     class="item-checkbox" 
                                     data-item-id="<?php echo $item['id']; ?>"
-                                    <?php echo $item['status'] == 'concluido' ? 'checked' : ''; ?>
+                                    <?php echo $item['comprado'] ? 'checked' : ''; ?>
                                 >
-                                <span class="<?php echo $item['status'] == 'concluido' ? 'line-through text-gray-500' : ''; ?>">
+                                <span class="<?php echo $item['comprado'] ? 'line-through text-gray-500' : ''; ?>">
                                     <?php echo htmlspecialchars($item['nome']); ?>
                                 </span>
                             </div>
-                            <div class="text-gray-600">
-                                <?php echo $item['quantidade'] . ' ' . $item['unidade']; ?>
-                                <button class="ml-2 text-red-500 hover:text-red-700 excluir-item" data-item-id="<?php echo $item['id']; ?>">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-gray-600">
+                                    <?php echo htmlspecialchars($item['quantidade'] . ' ' . $item['unidade']); ?>
+                                </span>
+                                <button class="text-red-500 hover:text-red-700 excluir-item" data-item-id="<?php echo $item['id']; ?>">
                                     <i data-feather="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
@@ -126,22 +136,15 @@ $itens = $lista->buscarItens();
                 <?php endif; ?>
             </div>
 
-            <!-- Resumo da Lista -->
-            <div class="mt-6 pt-4 border-t flex justify-between items-center">
+            <!-- Contadores -->
+            <div class="mt-6 flex justify-between text-sm text-gray-600">
                 <div>
-                    <span class="text-gray-600">Total de itens:</span>
-                    <span id="totalItens" class="font-bold"><?php echo count($itens); ?></span>
+                    Total de itens: <span id="totalItens"><?php echo count($itens); ?></span>
                 </div>
                 <div>
-                    <span class="text-gray-600">Itens comprados:</span>
-                    <span id="itensConcluidos" class="font-bold">
-                        <?php 
-                        $concluidos = array_filter($itens, function($item) {
-                            return $item['status'] == 'concluido';
-                        });
-                        echo count($concluidos); 
-                        ?>
-                    </span>
+                    Itens comprados: <span id="itensConcluidos"><?php echo array_reduce($itens, function($carry, $item) { 
+                        return $carry + ($item['comprado'] ? 1 : 0); 
+                    }, 0); ?></span>
                 </div>
             </div>
         </div>
@@ -205,9 +208,11 @@ $itens = $lista->buscarItens();
                                 >
                                 <span>${nome}</span>
                             </div>
-                            <div class="text-gray-600">
-                                ${quantidade} ${unidade}
-                                <button class="ml-2 text-red-500 hover:text-red-700 excluir-item" data-item-id="${data.item_id}">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-gray-600">
+                                    ${quantidade} ${unidade}
+                                </span>
+                                <button class="text-red-500 hover:text-red-700 excluir-item" data-item-id="${data.item_id}">
                                     <i data-feather="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
@@ -246,7 +251,7 @@ $itens = $lista->buscarItens();
 
             checkbox.addEventListener('change', function() {
                 const itemId = this.dataset.itemId;
-                const status = this.checked ? 'concluido' : 'pendente';
+                const status = this.checked ? 'comprado' : 'pendente';
                 
                 fetch('lista_ajax.php?action=atualizar_status', {
                     method: 'PUT',
@@ -263,7 +268,7 @@ $itens = $lista->buscarItens();
                 .then(data => {
                     if (data.success) {
                         // Atualizar visual do item
-                        if (status === 'concluido') {
+                        if (status === 'comprado') {
                             span.classList.add('line-through', 'text-gray-500');
                             itensConcluidosElement.textContent = 
                                 parseInt(itensConcluidosElement.textContent) + 1;
@@ -286,13 +291,12 @@ $itens = $lista->buscarItens();
             excluirBotao.addEventListener('click', function() {
                 const itemId = this.dataset.itemId;
                 
-                fetch('lista_ajax.php?action=remover_item', {
+                fetch('lista_ajax.php?action=excluir_item', {
                     method: 'DELETE',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        lista_id: listaId,
                         item_id: itemId
                     })
                 })
@@ -300,24 +304,23 @@ $itens = $lista->buscarItens();
                 .then(data => {
                     if (data.success) {
                         // Remover item da lista
-                        listaItensElement.removeChild(itemElement);
+                        itemElement.remove();
                         
                         // Atualizar contadores
+                        const totalItensElement = document.getElementById('totalItens');
                         totalItensElement.textContent = parseInt(totalItensElement.textContent) - 1;
                         
-                        // Se o item estava concluído, atualizar contador de concluídos
-                        const checkbox = itemElement.querySelector('.item-checkbox');
                         if (checkbox.checked) {
-                            itensConcluidosElement.textContent = 
-                                parseInt(itensConcluidosElement.textContent) - 1;
+                            const itensConcluidosElement = document.getElementById('itensConcluidos');
+                            itensConcluidosElement.textContent = parseInt(itensConcluidosElement.textContent) - 1;
                         }
-                        
-                        showToast(data.message);
+                    } else {
+                        throw new Error(data.error || 'Erro ao excluir item');
                     }
                 })
                 .catch(error => {
                     console.error('Erro:', error);
-                    showToast('Erro ao remover item', 'error');
+                    alert('Erro ao excluir item. Por favor, tente novamente.');
                 });
             });
         }

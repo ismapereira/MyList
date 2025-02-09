@@ -58,16 +58,16 @@ try {
             if ($action === 'atualizar_status') {
                 $data = json_decode(file_get_contents('php://input'), true);
                 
-                if (!isset($data['lista_id'], $data['item_id'], $data['status'])) {
+                if (!isset($data['item_id'], $data['status'])) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Dados incompletos']);
                     exit();
                 }
 
-                $lista->id = $data['lista_id'];
-                $resultado = $lista->atualizarStatusItem(
+                $comprado = $data['status'] === 'comprado';
+                $resultado = $lista->marcarItemComoComprado(
                     $data['item_id'], 
-                    $data['status']
+                    $comprado
                 );
 
                 if ($resultado) {
@@ -85,17 +85,16 @@ try {
 
         case 'DELETE':
             // Remover item
-            if ($action === 'remover_item') {
+            if ($action === 'excluir_item') {
                 $data = json_decode(file_get_contents('php://input'), true);
                 
-                if (!isset($data['lista_id'], $data['item_id'])) {
+                if (!isset($data['item_id'])) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Dados incompletos']);
                     exit();
                 }
 
-                $lista->id = $data['lista_id'];
-                $resultado = $lista->removerItem($data['item_id']);
+                $resultado = $lista->excluirItem($data['item_id']);
 
                 if ($resultado) {
                     echo json_encode([

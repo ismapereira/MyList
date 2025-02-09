@@ -3,7 +3,7 @@ session_start();
 require_once 'models/Usuario.php';
 
 // Verificar se o usuário já está logado
-if(isset($_SESSION['usuario_id'])) {
+if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit();
 }
@@ -11,19 +11,23 @@ if(isset($_SESSION['usuario_id'])) {
 $erro = '';
 
 // Processamento do formulário de login
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $usuario = new Usuario();
     $usuario->email = $_POST['email'];
     $usuario->senha = $_POST['senha'];
 
-    if($usuario->autenticar()) {
+    if ($usuario->autenticar()) {
         // Login bem-sucedido
-        $_SESSION['usuario_id'] = $usuario->id;
-        $_SESSION['usuario_nome'] = $usuario->nome;
+        $_SESSION['user_id'] = $usuario->id;
+        $_SESSION['user_nome'] = $usuario->nome;
+        
+        error_log("Login bem-sucedido - User ID: " . $usuario->id);
+        
         header("Location: dashboard.php");
         exit();
     } else {
         $erro = "Email ou senha inválidos";
+        error_log("Falha no login - Email: " . $usuario->email);
     }
 }
 ?>

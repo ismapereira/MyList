@@ -189,78 +189,145 @@ class Lista {
 
     // Buscar itens de uma lista
     public function buscarItens() {
-        $query = "SELECT * FROM " . $this->getTabelaItens() . " 
-                  WHERE lista_id = :lista_id";
+        try {
+            // Verificar se a lista pertence ao usuário
+            $query = "SELECT id FROM " . $this->tabela_listas . " 
+                     WHERE id = :lista_id AND usuario_id = :usuario_id";
+            
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":lista_id", $this->id);
+            $stmt->bindParam(":usuario_id", $this->usuario_id);
+            $stmt->execute();
+            
+            if (!$stmt->fetch()) {
+                throw new Exception("Lista não encontrada ou sem permissão");
+            }
 
-        $stmt = $this->conexao->prepare($query);
-        $stmt->bindParam(":lista_id", $this->id);
-        $stmt->execute();
+            // Buscar itens com status de compra
+            $query = "SELECT i.*, COALESCE(i.comprado, 0) as comprado 
+                     FROM " . $this->tabela_itens_privada . " i
+                     WHERE i.lista_id = :lista_id 
+                     ORDER BY i.comprado ASC, i.nome ASC";
 
-        $this->itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $this->itens;
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":lista_id", $this->id);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Erro ao buscar itens da lista: " . $e->getMessage());
+            return [];
+        }
     }
 
     // Marcar item como comprado
-    public function marcarItemComprado($item_id, $comprado) {
-        $query = "UPDATE " . $this->getTabelaItens() . " 
-                  SET comprado = :comprado 
-                  WHERE id = :item_id AND lista_id = :lista_id";
+    public function marcarItemComoComprado($item_id, $comprado = true) {
+        try {
+            // Verificar se o item pertence a uma lista do usuário
+            $query = "SELECT i.id FROM " . $this->tabela_itens_privada . " i
+                     INNER JOIN " . $this->tabela_listas . " l ON i.lista_id = l.id
+                     WHERE i.id = :item_id AND l.usuario_id = :usuario_id";
+            
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":item_id", $item_id);
+            $stmt->bindParam(":usuario_id", $this->usuario_id);
+            $stmt->execute();
+            
+            if (!$stmt->fetch()) {
+                throw new Exception("Item não encontrado ou sem permissão");
+            }
 
-        $stmt = $this->conexao->prepare($query);
-        $stmt->bindParam(":comprado", $comprado, PDO::PARAM_BOOL);
-        $stmt->bindParam(":item_id", $item_id);
-        $stmt->bindParam(":lista_id", $this->id);
+            // Atualizar status do item
+            $query = "UPDATE " . $this->tabela_itens_privada . "
+                     SET comprado = :comprado
+                     WHERE id = :item_id";
 
-        return $stmt->execute();
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":item_id", $item_id);
+            $stmt->bindParam(":comprado", $comprado, PDO::PARAM_BOOL);
+            
+            if (!$stmt->execute()) {
+                error_log("Erro ao atualizar status do item: " . print_r($stmt->errorInfo(), true));
+                return false;
+            }
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Erro ao marcar item como comprado: " . $e->getMessage());
+            return false;
+        }
     }
 
     // Listar listas do usuário com detalhes de itens
     public function listarListasUsuario() {
-        $query = "SELECT 
-                    l.id, 
-                    l.nome, 
-                    l.descricao, 
-                    l.data_criacao,
-                    (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
-                     WHERE lista_id = l.id AND status = 'pendente') as itens_pendentes,
-                    (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
-                     WHERE lista_id = l.id AND status = 'concluido') as itens_concluidos,
-                    CASE 
-                        WHEN (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
-                              WHERE lista_id = l.id) = 0
-                        THEN 'vazia'
-                        WHEN (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
-                              WHERE lista_id = l.id) = 
-                             (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
-                              WHERE lista_id = l.id AND status = 'concluido')
-                        THEN 'concluida'
-                        ELSE 'em_andamento'
-                    END as status
-                  FROM " . $this->tabela_listas . " l
-                  WHERE l.usuario_id = :usuario_id 
-                  ORDER BY l.data_criacao DESC";
+        try {
+            error_log("Listando listas para usuário: " . $this->usuario_id);
 
-        $stmt = $this->conexao->prepare($query);
-        $stmt->bindParam(":usuario_id", $this->usuario_id);
-        $stmt->execute();
+            $query = "SELECT l.*,
+                            (SELECT COUNT(*) FROM " . $this->tabela_itens_privada . " i 
+                             WHERE i.lista_id = l.id) as total_itens,
+                            (SELECT COUNT(*) FROM " . $this->tabela_itens_privada . " i 
+                             WHERE i.lista_id = l.id AND (i.comprado = 0 OR i.comprado IS NULL)) as itens_pendentes,
+                            (SELECT COUNT(*) FROM " . $this->tabela_itens_privada . " i 
+                             WHERE i.lista_id = l.id AND i.comprado = 1) as itens_comprados
+                     FROM " . $this->tabela_listas . " l
+                     WHERE l.usuario_id = :usuario_id
+                     ORDER BY l.data_criacao DESC";
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Query: " . $query);
+
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":usuario_id", $this->usuario_id);
+            
+            if (!$stmt->execute()) {
+                error_log("Erro ao executar query de listar listas: " . print_r($stmt->errorInfo(), true));
+                return [];
+            }
+
+            $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Listas encontradas: " . print_r($resultado, true));
+
+            return $resultado;
+        } catch (Exception $e) {
+            error_log("Erro ao listar listas do usuário: " . $e->getMessage());
+            return [];
+        }
     }
 
     // Obter detalhes da lista
     public function obterDetalhesLista() {
-        $query = "SELECT l.id, l.nome, l.descricao, l.data_criacao, 
-                    (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
-                     WHERE lista_id = l.id) as total_itens
-                  FROM " . $this->tabela_listas . " l
-                  WHERE l.id = :id AND l.usuario_id = :usuario_id";
+        try {
+            $query = "SELECT l.*, 
+                            (SELECT COUNT(*) FROM " . $this->tabela_itens_privada . " i 
+                             WHERE i.lista_id = l.id) as total_itens,
+                            (SELECT COUNT(*) FROM " . $this->tabela_itens_privada . " i 
+                             WHERE i.lista_id = l.id AND i.comprado = 1) as itens_comprados,
+                            (SELECT COUNT(*) FROM " . $this->tabela_itens_privada . " i 
+                             WHERE i.lista_id = l.id AND (i.comprado = 0 OR i.comprado IS NULL)) as itens_pendentes
+                     FROM " . $this->tabela_listas . " l
+                     WHERE l.id = :lista_id AND l.usuario_id = :usuario_id";
 
-        $stmt = $this->conexao->prepare($query);
-        $stmt->bindParam(":id", $this->id);
-        $stmt->bindParam(":usuario_id", $this->usuario_id);
-        $stmt->execute();
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":lista_id", $this->id);
+            $stmt->bindParam(":usuario_id", $this->usuario_id);
+            
+            if (!$stmt->execute()) {
+                error_log("Erro ao executar query de detalhes da lista: " . print_r($stmt->errorInfo(), true));
+                return false;
+            }
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$resultado) {
+                error_log("Nenhum resultado encontrado para lista_id: {$this->id} e usuario_id: {$this->usuario_id}");
+                return false;
+            }
+
+            return $resultado;
+        } catch (Exception $e) {
+            error_log("Erro ao obter detalhes da lista: " . $e->getMessage());
+            return false;
+        }
     }
 
     // Buscar itens da lista
@@ -302,40 +369,53 @@ class Lista {
         }
     }
 
-    // Adicionar item à lista
-    public function adicionarItemLista($nome, $quantidade = null, $unidade = null) {
-        if (empty($this->id)) {
-            throw new Exception("ID da lista não definido");
-        }
-
+    // Adicionar item à lista e retornar o ID
+    public function adicionarItemLista($nome, $quantidade, $unidade) {
         try {
-            $query = "INSERT INTO " . $this->getTabelaItens() . " 
-                      (lista_id, nome, quantidade, unidade, comprado) 
-                      VALUES (:lista_id, :nome, :quantidade, :unidade, 0)";
-
-            $stmt = $this->getConexao()->prepare($query);
-            $stmt->bindParam(":lista_id", $this->id, PDO::PARAM_INT);
-            $stmt->bindParam(":nome", $nome, PDO::PARAM_STR);
-            $stmt->bindParam(":quantidade", $quantidade, $quantidade ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmt->bindParam(":unidade", $unidade, $unidade ? PDO::PARAM_STR : PDO::PARAM_NULL);
-
-            // Log de depuração
-            error_log("[MyList Debug] Adicionando item à lista - Lista ID: {$this->id}, Nome: $nome, Quantidade: $quantidade, Unidade: $unidade");
-
-            $resultado = $stmt->execute();
-
-            if (!$resultado) {
-                error_log("[MyList Debug] Falha ao adicionar item à lista");
-                error_log("[MyList Debug] Erro: " . print_r($stmt->errorInfo(), true));
-                throw new Exception("Falha ao adicionar item à lista");
+            // Validar entrada
+            if (empty($nome) || empty($quantidade) || empty($unidade)) {
+                throw new Exception("Todos os campos são obrigatórios");
             }
 
-            // Retornar o ID do item inserido
-            return $this->getConexao()->lastInsertId();
+            // Verificar se a lista pertence ao usuário
+            $query = "SELECT id FROM " . $this->tabela_listas . " 
+                     WHERE id = :lista_id AND usuario_id = :usuario_id";
+            
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":lista_id", $this->id);
+            $stmt->bindParam(":usuario_id", $this->usuario_id);
+            $stmt->execute();
+            
+            if (!$stmt->fetch()) {
+                throw new Exception("Lista não encontrada ou sem permissão");
+            }
 
+            // Preparar query de inserção
+            $query = "INSERT INTO " . $this->tabela_itens_privada . " 
+                     (lista_id, nome, quantidade, unidade, comprado) 
+                     VALUES (:lista_id, :nome, :quantidade, :unidade, 0)";
+
+            $stmt = $this->conexao->prepare($query);
+
+            // Limpar e sanitizar dados
+            $nome = htmlspecialchars(strip_tags($nome));
+            $unidade = htmlspecialchars(strip_tags($unidade));
+
+            // Bind de parâmetros
+            $stmt->bindParam(":lista_id", $this->id);
+            $stmt->bindParam(":nome", $nome);
+            $stmt->bindParam(":quantidade", $quantidade);
+            $stmt->bindParam(":unidade", $unidade);
+
+            // Executar e retornar ID do item inserido
+            if ($stmt->execute()) {
+                return $this->conexao->lastInsertId();
+            }
+
+            return false;
         } catch (Exception $e) {
-            error_log("[MyList Debug] Erro ao adicionar item à lista: " . $e->getMessage());
-            throw $e;
+            error_log("Erro ao adicionar item à lista: " . $e->getMessage());
+            return false;
         }
     }
 
@@ -410,6 +490,42 @@ class Lista {
         } catch (Exception $e) {
             error_log("[MyList Debug] Erro ao remover item da lista: " . $e->getMessage());
             throw $e;
+        }
+    }
+
+    // Excluir item da lista
+    public function excluirItem($item_id) {
+        try {
+            // Verificar se o item pertence a uma lista do usuário
+            $query = "SELECT i.id FROM " . $this->tabela_itens_privada . " i
+                     INNER JOIN " . $this->tabela_listas . " l ON i.lista_id = l.id
+                     WHERE i.id = :item_id AND l.usuario_id = :usuario_id";
+            
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":item_id", $item_id);
+            $stmt->bindParam(":usuario_id", $this->usuario_id);
+            $stmt->execute();
+            
+            if (!$stmt->fetch()) {
+                throw new Exception("Item não encontrado ou sem permissão");
+            }
+
+            // Excluir o item
+            $query = "DELETE FROM " . $this->tabela_itens_privada . "
+                     WHERE id = :item_id";
+
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":item_id", $item_id);
+            
+            if (!$stmt->execute()) {
+                error_log("Erro ao excluir item: " . print_r($stmt->errorInfo(), true));
+                return false;
+            }
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Erro ao excluir item: " . $e->getMessage());
+            return false;
         }
     }
 

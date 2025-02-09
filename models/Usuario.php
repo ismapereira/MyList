@@ -48,44 +48,74 @@ class Usuario {
 
     // Método para autenticar usuário
     public function autenticar() {
-        $query = "SELECT * FROM " . $this->tabela . " WHERE email = :email LIMIT 0,1";
+        try {
+            error_log("Tentativa de autenticação - Email: " . $this->email);
 
-        $stmt = $this->conexao->prepare($query);
-        $stmt->bindParam(":email", $this->email);
-        $stmt->execute();
+            $query = "SELECT * FROM " . $this->tabela . " WHERE email = :email LIMIT 0,1";
+            
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":email", $this->email);
+            
+            if (!$stmt->execute()) {
+                error_log("Erro ao executar query de autenticação: " . print_r($stmt->errorInfo(), true));
+                return false;
+            }
 
-        $linha = $stmt->fetch(PDO::FETCH_ASSOC);
+            $linha = $stmt->fetch(PDO::FETCH_ASSOC);
+            error_log("Resultado da busca: " . ($linha ? "Usuário encontrado" : "Usuário não encontrado"));
 
-        // Verifica se encontrou o usuário e se a senha está correta
-        if($linha && password_verify($this->senha, $linha['senha'])) {
-            // Define as propriedades do usuário
-            $this->id = $linha['id'];
-            $this->nome = $linha['nome'];
-            return true;
+            // Verifica se encontrou o usuário e se a senha está correta
+            if ($linha && password_verify($this->senha, $linha['senha'])) {
+                // Define as propriedades do usuário
+                $this->id = $linha['id'];
+                $this->nome = $linha['nome'];
+                
+                error_log("Autenticação bem-sucedida - ID: " . $this->id . " - Nome: " . $this->nome);
+                return true;
+            }
+
+            error_log("Autenticação falhou - Senha inválida");
+            return false;
+        } catch (Exception $e) {
+            error_log("Erro na autenticação: " . $e->getMessage());
+            return false;
         }
-
-        return false;
     }
 
     // Método para buscar usuário por ID
     public function obterPorId() {
-        $query = "SELECT id, nome, email, data_criacao, preferencias FROM " . $this->tabela . " WHERE id = :id LIMIT 0,1";
+        try {
+            error_log("Buscando usuário por ID: " . $this->id);
 
-        $stmt = $this->conexao->prepare($query);
-        $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
-        $stmt->execute();
+            $query = "SELECT id, nome, email, data_criacao, preferencias FROM " . $this->tabela . " 
+                     WHERE id = :id LIMIT 0,1";
 
-        $linha = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+            
+            if (!$stmt->execute()) {
+                error_log("Erro ao executar query de busca por ID: " . print_r($stmt->errorInfo(), true));
+                return false;
+            }
 
-        if($linha) {
-            $this->nome = $linha['nome'];
-            $this->email = $linha['email'];
-            $this->data_criacao = $linha['data_criacao'];
-            $this->preferencias = json_decode($linha['preferencias'], true) ?? [];
-            return true;
+            $linha = $stmt->fetch(PDO::FETCH_ASSOC);
+            error_log("Resultado da busca: " . ($linha ? "Usuário encontrado" : "Usuário não encontrado"));
+
+            if ($linha) {
+                $this->nome = $linha['nome'];
+                $this->email = $linha['email'];
+                $this->data_criacao = $linha['data_criacao'];
+                $this->preferencias = json_decode($linha['preferencias'], true) ?? [];
+                
+                error_log("Detalhes do usuário carregados - Nome: " . $this->nome . " - Email: " . $this->email);
+                return true;
+            }
+
+            return false;
+        } catch (Exception $e) {
+            error_log("Erro ao buscar usuário por ID: " . $e->getMessage());
+            return false;
         }
-
-        return false;
     }
 
     // Método para verificar se o email já existe
