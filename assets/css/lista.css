@@ -1,0 +1,18 @@
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.form-check-label.text-muted {
+    text-decoration: line-through;
+}
+
+.remover-item {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.list-group-item:hover .remover-item {
+    opacity: 1;
+}
