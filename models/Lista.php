@@ -4,7 +4,7 @@ require_once 'config/database.php';
 class Lista {
     private $conexao;
     private $tabela_listas = 'listas';
-    private $tabela_itens = 'itens_lista';
+    private $tabela_itens_privada = 'itens_lista';
 
     // Propriedades da lista
     public $id;
@@ -12,6 +12,7 @@ class Lista {
     public $descricao;
     public $usuario_id;
     public $itens = [];
+    public $status;
 
     // Construtor
     public function __construct() {
@@ -22,6 +23,31 @@ class Lista {
     // Método para obter a conexão
     public function getConexao() {
         return $this->conexao;
+    }
+
+    // Getter para tabela de itens
+    public function getTabelaItens() {
+        return $this->tabela_itens_privada;
+    }
+
+    // Setter para tabela de itens
+    public function setTabelaItens($tabela) {
+        $this->tabela_itens_privada = $tabela;
+    }
+
+    // Método mágico para lidar com propriedades indefinidas
+    public function __get($nome) {
+        if ($nome === 'tabela_itens') {
+            return $this->getTabelaItens();
+        }
+        return null;
+    }
+
+    // Método mágico para definir propriedades
+    public function __set($nome, $valor) {
+        if ($nome === 'tabela_itens') {
+            $this->setTabelaItens($valor);
+        }
     }
 
     // Criar nova lista
@@ -126,7 +152,7 @@ class Lista {
 
     // Adicionar item à lista
     public function adicionarItem($nome, $quantidade, $unidade) {
-        $query = "INSERT INTO " . $this->tabela_itens . " 
+        $query = "INSERT INTO " . $this->getTabelaItens() . " 
                   SET lista_id = :lista_id, nome = :nome, 
                   quantidade = :quantidade, unidade = :unidade";
 
@@ -167,7 +193,7 @@ class Lista {
 
     // Buscar itens de uma lista
     public function buscarItens() {
-        $query = "SELECT * FROM " . $this->tabela_itens . " 
+        $query = "SELECT * FROM " . $this->getTabelaItens() . " 
                   WHERE lista_id = :lista_id";
 
         $stmt = $this->conexao->prepare($query);
@@ -180,7 +206,7 @@ class Lista {
 
     // Marcar item como comprado
     public function marcarItemComprado($item_id, $comprado) {
-        $query = "UPDATE " . $this->tabela_itens . " 
+        $query = "UPDATE " . $this->getTabelaItens() . " 
                   SET comprado = :comprado 
                   WHERE id = :item_id AND lista_id = :lista_id";
 
@@ -199,17 +225,17 @@ class Lista {
                     l.nome, 
                     l.descricao, 
                     l.data_criacao,
-                    (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                    (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
                      WHERE lista_id = l.id AND status = 'pendente') as itens_pendentes,
-                    (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                    (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
                      WHERE lista_id = l.id AND status = 'concluido') as itens_concluidos,
                     CASE 
-                        WHEN (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                        WHEN (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
                               WHERE lista_id = l.id) = 0
                         THEN 'vazia'
-                        WHEN (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                        WHEN (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
                               WHERE lista_id = l.id) = 
-                             (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                             (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
                               WHERE lista_id = l.id AND status = 'concluido')
                         THEN 'concluida'
                         ELSE 'em_andamento'
@@ -228,7 +254,7 @@ class Lista {
     // Obter detalhes da lista
     public function obterDetalhesLista() {
         $query = "SELECT l.id, l.nome, l.descricao, l.data_criacao, 
-                    (SELECT COUNT(*) FROM " . $this->tabela_itens . " 
+                    (SELECT COUNT(*) FROM " . $this->getTabelaItens() . " 
                      WHERE lista_id = l.id) as total_itens
                   FROM " . $this->tabela_listas . " l
                   WHERE l.id = :id AND l.usuario_id = :usuario_id";
@@ -243,73 +269,305 @@ class Lista {
 
     // Buscar itens da lista
     public function buscarItensLista() {
-        $query = "SELECT id, nome, quantidade, unidade, status 
-                  FROM " . $this->tabela_itens . "
-                  WHERE lista_id = :lista_id
-                  ORDER BY status = 'pendente' DESC, nome ASC";
+        // Validar se o ID da lista está definido
+        if (!$this->id) {
+            error_log("[MyList Debug] ID da lista não definido ao buscar itens");
+            throw new Exception("ID da lista não definido");
+        }
 
-        $stmt = $this->conexao->prepare($query);
-        $stmt->bindParam(":lista_id", $this->id);
-        $stmt->execute();
+        $query = "SELECT id, nome, quantidade, unidade, comprado 
+                  FROM " . $this->getTabelaItens() . " 
+                  WHERE lista_id = :lista_id 
+                  ORDER BY comprado, nome";
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":lista_id", $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Buscar todos os itens
+            $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Log de depuração
+            error_log("[MyList Debug] Itens encontrados para lista {$this->id}: " . count($itens));
+            
+            // Atualizar propriedade de itens da classe
+            $this->itens = $itens;
+
+            return $itens;
+        } catch (PDOException $e) {
+            // Log do erro para depuração
+            error_log("[MyList Debug] Erro ao buscar itens da lista: " . $e->getMessage());
+            error_log("[MyList Debug] Query: $query");
+            error_log("[MyList Debug] ID da lista: {$this->id}");
+            error_log("[MyList Debug] Erro detalhado: " . print_r($e, true));
+            
+            throw new Exception("Erro ao buscar itens da lista: " . $e->getMessage());
+        }
     }
 
     // Adicionar item à lista
-    public function adicionarItemLista($nome, $quantidade, $unidade) {
-        $query = "INSERT INTO " . $this->tabela_itens . " 
-                  SET lista_id = :lista_id, 
-                      nome = :nome, 
-                      quantidade = :quantidade, 
-                      unidade = :unidade,
-                      status = 'pendente'";
+    public function adicionarItemLista($nome, $quantidade = null, $unidade = null) {
+        if (empty($this->id)) {
+            throw new Exception("ID da lista não definido");
+        }
+
+        try {
+            $query = "INSERT INTO " . $this->getTabelaItens() . " 
+                      (lista_id, nome, quantidade, unidade, comprado) 
+                      VALUES (:lista_id, :nome, :quantidade, :unidade, 0)";
+
+            $stmt = $this->getConexao()->prepare($query);
+            $stmt->bindParam(":lista_id", $this->id, PDO::PARAM_INT);
+            $stmt->bindParam(":nome", $nome, PDO::PARAM_STR);
+            $stmt->bindParam(":quantidade", $quantidade, $quantidade ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindParam(":unidade", $unidade, $unidade ? PDO::PARAM_STR : PDO::PARAM_NULL);
+
+            // Log de depuração
+            error_log("[MyList Debug] Adicionando item à lista - Lista ID: {$this->id}, Nome: $nome, Quantidade: $quantidade, Unidade: $unidade");
+
+            $resultado = $stmt->execute();
+
+            if (!$resultado) {
+                error_log("[MyList Debug] Falha ao adicionar item à lista");
+                error_log("[MyList Debug] Erro: " . print_r($stmt->errorInfo(), true));
+                throw new Exception("Falha ao adicionar item à lista");
+            }
+
+            // Retornar o ID do item inserido
+            return $this->getConexao()->lastInsertId();
+
+        } catch (Exception $e) {
+            error_log("[MyList Debug] Erro ao adicionar item à lista: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    // Método para editar um item da lista
+    public function editarItemLista($item_id, $nome, $quantidade = null, $unidade = null) {
+        if (empty($this->id)) {
+            throw new Exception("ID da lista não definido");
+        }
+
+        try {
+            $query = "UPDATE " . $this->getTabelaItens() . " 
+                      SET nome = :nome, 
+                          quantidade = :quantidade, 
+                          unidade = :unidade 
+                      WHERE id = :item_id AND lista_id = :lista_id";
+
+            $stmt = $this->getConexao()->prepare($query);
+            $stmt->bindParam(":nome", $nome, PDO::PARAM_STR);
+            $stmt->bindParam(":quantidade", $quantidade, $quantidade ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindParam(":unidade", $unidade, $unidade ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindParam(":item_id", $item_id, PDO::PARAM_INT);
+            $stmt->bindParam(":lista_id", $this->id, PDO::PARAM_INT);
+
+            // Log de depuração
+            error_log("[MyList Debug] Editando item da lista - Lista ID: {$this->id}, Item ID: $item_id, Nome: $nome, Quantidade: $quantidade, Unidade: $unidade");
+
+            $resultado = $stmt->execute();
+
+            if (!$resultado) {
+                error_log("[MyList Debug] Falha ao editar item da lista");
+                error_log("[MyList Debug] Erro: " . print_r($stmt->errorInfo(), true));
+                throw new Exception("Falha ao editar item da lista");
+            }
+
+            // Retornar o número de linhas afetadas
+            return $stmt->rowCount();
+
+        } catch (Exception $e) {
+            error_log("[MyList Debug] Erro ao editar item da lista: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    // Método para remover um item da lista
+    public function removerItemLista($item_id) {
+        if (empty($this->id)) {
+            throw new Exception("ID da lista não definido");
+        }
+
+        try {
+            $query = "DELETE FROM " . $this->getTabelaItens() . " 
+                      WHERE id = :item_id AND lista_id = :lista_id";
+
+            $stmt = $this->getConexao()->prepare($query);
+            $stmt->bindParam(":item_id", $item_id, PDO::PARAM_INT);
+            $stmt->bindParam(":lista_id", $this->id, PDO::PARAM_INT);
+
+            // Log de depuração
+            error_log("[MyList Debug] Removendo item da lista - Lista ID: {$this->id}, Item ID: $item_id");
+
+            $resultado = $stmt->execute();
+
+            if (!$resultado) {
+                error_log("[MyList Debug] Falha ao remover item da lista");
+                error_log("[MyList Debug] Erro: " . print_r($stmt->errorInfo(), true));
+                throw new Exception("Falha ao remover item da lista");
+            }
+
+            // Retornar o número de linhas afetadas
+            return $stmt->rowCount();
+
+        } catch (Exception $e) {
+            error_log("[MyList Debug] Erro ao remover item da lista: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    // Atualizar lista
+    public function atualizar() {
+        $query = "UPDATE " . $this->tabela_listas . "
+                  SET nome = :nome, 
+                      descricao = :descricao,
+                      status = :status
+                  WHERE id = :id AND usuario_id = :usuario_id";
 
         $stmt = $this->conexao->prepare($query);
 
-        // Limpar e validar dados
-        $nome = htmlspecialchars(strip_tags($nome));
-        $unidade = htmlspecialchars(strip_tags($unidade));
+        // Limpa e vincula os dados
+        $this->nome = htmlspecialchars(strip_tags($this->nome));
+        $this->descricao = htmlspecialchars(strip_tags($this->descricao));
+        $this->status = htmlspecialchars(strip_tags($this->status));
 
-        $stmt->bindParam(":lista_id", $this->id);
-        $stmt->bindParam(":nome", $nome);
-        $stmt->bindParam(":quantidade", $quantidade);
-        $stmt->bindParam(":unidade", $unidade);
+        $stmt->bindParam(":nome", $this->nome);
+        $stmt->bindParam(":descricao", $this->descricao);
+        $stmt->bindParam(":status", $this->status);
+        $stmt->bindParam(":id", $this->id);
+        $stmt->bindParam(":usuario_id", $this->usuario_id);
 
-        if($stmt->execute()) {
-            return $this->conexao->lastInsertId();
+        return $stmt->execute();
+    }
+
+    // Marcar lista como concluída
+    public function marcarComoConcluida() {
+        $query = "UPDATE " . $this->tabela_listas . "
+                  SET status = 'concluida'
+                  WHERE id = :id AND usuario_id = :usuario_id";
+
+        $stmt = $this->conexao->prepare($query);
+        $stmt->bindParam(":id", $this->id);
+        $stmt->bindParam(":usuario_id", $this->usuario_id);
+
+        if ($stmt->execute()) {
+            // Atualizar todos os itens da lista como concluídos
+            $query = "UPDATE " . $this->getTabelaItens() . "
+                      SET status = 'concluido'
+                      WHERE lista_id = :lista_id";
+            
+            $stmt = $this->conexao->prepare($query);
+            $stmt->bindParam(":lista_id", $this->id);
+            
+            return $stmt->execute();
         }
 
         return false;
     }
 
-    // Atualizar status do item
-    public function atualizarStatusItem($item_id, $status) {
-        $query = "UPDATE " . $this->tabela_itens . " 
-                  SET status = :status 
-                  WHERE id = :item_id AND lista_id = :lista_id";
+    // Obter lista por ID
+    public function obterPorId() {
+        // Validar se o ID e o usuário_id estão definidos
+        if (!$this->id || !$this->usuario_id) {
+            error_log("[MyList Debug] ID da lista ou usuário não definido");
+            error_log("[MyList Debug] ID da lista: " . ($this->id ?: 'NÃO DEFINIDO'));
+            error_log("[MyList Debug] ID do usuário: " . ($this->usuario_id ?: 'NÃO DEFINIDO'));
+            throw new Exception("ID da lista ou usuário não definido");
+        }
 
-        $stmt = $this->conexao->prepare($query);
+        $query = "SELECT id, nome, descricao, data_criacao
+                  FROM " . $this->tabela_listas . "
+                  WHERE id = :id AND usuario_id = :usuario_id";
 
-        $status = ($status == 'concluido') ? 'concluido' : 'pendente';
-
-        $stmt->bindParam(":status", $status);
-        $stmt->bindParam(":item_id", $item_id);
-        $stmt->bindParam(":lista_id", $this->id);
-
-        return $stmt->execute();
+        try {
+            $stmt = $this->conexao->prepare($query);
+            
+            // Adicionar log de depuração
+            error_log("[MyList Debug] Tentando obter lista com ID: {$this->id}, Usuário ID: {$this->usuario_id}");
+            error_log("[MyList Debug] Query: $query");
+            
+            $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+            $stmt->bindParam(":usuario_id", $this->usuario_id, PDO::PARAM_INT);
+            
+            // Verificar estado da conexão
+            error_log("[MyList Debug] Estado da conexão: " . $this->conexao->getAttribute(PDO::ATTR_CONNECTION_STATUS));
+            
+            $stmt->execute();
+            
+            // Adicionar log de depuração para o número de linhas
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            error_log("[MyList Debug] Resultado da busca: " . ($resultado ? json_encode($resultado) : "Nenhum resultado"));
+            
+            return $resultado;
+        } catch (PDOException $e) {
+            // Log do erro para depuração
+            error_log("[MyList Debug] Erro ao obter lista: " . $e->getMessage());
+            error_log("[MyList Debug] Query: $query");
+            error_log("[MyList Debug] Parâmetros - ID: {$this->id}, Usuário ID: {$this->usuario_id}");
+            error_log("[MyList Debug] Erro detalhado: " . print_r($e, true));
+            
+            throw new Exception("Erro ao buscar lista: " . $e->getMessage());
+        }
     }
 
-    // Remover item da lista
-    public function removerItem($item_id) {
-        $query = "DELETE FROM " . $this->tabela_itens . " 
-                  WHERE id = :item_id AND lista_id = :lista_id";
+    // Editar lista existente
+    public function editar() {
+        // Validar dados obrigatórios
+        if (!$this->id || !$this->nome) {
+            error_log("[MyList Debug] Dados inválidos para edição de lista");
+            error_log("[MyList Debug] ID da lista: " . ($this->id ?: 'NÃO DEFINIDO'));
+            error_log("[MyList Debug] Nome da lista: " . ($this->nome ?: 'NÃO DEFINIDO'));
+            throw new Exception("Dados inválidos para edição de lista");
+        }
 
-        $stmt = $this->conexao->prepare($query);
+        // Preparar query de atualização
+        $query = "UPDATE " . $this->tabela_listas . " 
+                  SET nome = :nome, 
+                      descricao = :descricao
+                  WHERE id = :id AND usuario_id = :usuario_id";
 
-        $stmt->bindParam(":item_id", $item_id);
-        $stmt->bindParam(":lista_id", $this->id);
+        try {
+            // Preparar statement
+            $stmt = $this->conexao->prepare($query);
 
-        return $stmt->execute();
+            // Limpar e validar dados
+            $this->nome = htmlspecialchars(strip_tags($this->nome));
+            $this->descricao = $this->descricao ? htmlspecialchars(strip_tags($this->descricao)) : null;
+
+            // Vincular parâmetros
+            $stmt->bindParam(":id", $this->id, PDO::PARAM_INT);
+            $stmt->bindParam(":nome", $this->nome);
+            $stmt->bindParam(":descricao", $this->descricao);
+            $stmt->bindParam(":usuario_id", $this->usuario_id, PDO::PARAM_INT);
+
+            // Adicionar log de depuração
+            error_log("[MyList Debug] Editando lista - ID: {$this->id}, Nome: {$this->nome}, Descrição: " . ($this->descricao ?: 'VAZIO'));
+            
+            // Executar query
+            $resultado = $stmt->execute();
+
+            // Verificar se a atualização foi bem-sucedida
+            if (!$resultado) {
+                error_log("[MyList Debug] Falha ao editar lista");
+                error_log("[MyList Debug] Erro: " . print_r($stmt->errorInfo(), true));
+                return false;
+            }
+
+            // Verificar se alguma linha foi afetada
+            $linhasAfetadas = $stmt->rowCount();
+            error_log("[MyList Debug] Linhas afetadas na edição: $linhasAfetadas");
+
+            return $linhasAfetadas > 0;
+        } catch (PDOException $e) {
+            // Log do erro para depuração
+            error_log("[MyList Debug] Erro ao editar lista: " . $e->getMessage());
+            error_log("[MyList Debug] Query: $query");
+            error_log("[MyList Debug] Parâmetros - ID: {$this->id}, Nome: {$this->nome}, Descrição: " . ($this->descricao ?: 'VAZIO'));
+            error_log("[MyList Debug] Erro detalhado: " . print_r($e, true));
+            
+            throw new Exception("Erro ao editar lista: " . $e->getMessage());
+        }
     }
 }
 ?>

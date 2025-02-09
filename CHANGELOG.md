@@ -1,5 +1,51 @@
 # Changelog
 
+## [0.3.28] - 2025-02-09
+
+### Corrigido
+- Contadores de listas na página Minhas Listas
+- Cálculo de listas totais, pendentes e concluídas
+- Renderização dinâmica de estatísticas de listas
+
+### Melhorado
+- Performance na recuperação de dados de listas
+- Precisão das informações estatísticas
+
+## [0.3.27] - 2025-02-09
+
+### Corrigido
+- Método de listagem de listas no JavaScript
+- Compatibilidade com endpoint de listagem AJAX
+- Renderização de listas na página Minhas Listas
+
+### Melhorado
+- Tratamento de erros na listagem de listas
+- Feedback visual para listas vazias
+
+## [0.3.26] - 2025-02-09
+
+### Adicionado
+- Método `editarLista()` na classe Lista para edição de listas via AJAX
+- Suporte a edição de status de lista diretamente no banco de dados
+
+### Corrigido
+- Compatibilidade entre modelo e controlador AJAX
+- Tratamento de dados de edição de lista
+
+## [0.3.25] - 2025-02-09
+
+### Adicionado
+- Funcionalidade de edição de listas existentes
+- Opção para marcar listas como concluídas
+- Sistema de status para listas (Nova, Em Andamento, Concluída)
+- Novo arquivo JavaScript para gerenciamento de listas
+- Modal de edição de lista com campos para nome, descrição e status
+
+### Melhorado
+- Interface de gerenciamento de listas com novos botões de ação
+- Feedback visual para diferentes status de lista
+- Organização do código JavaScript em arquivo separado
+
 ## [0.3.24] - 2025-02-09
 
 ### Adicionado

@@ -11,15 +11,12 @@ body {
 @keyframes gradientFlow {
     0% {
         background-position: 0% 50%;
-        background-color: #1A365D;
     }
     50% {
         background-position: 100% 50%;
-        background-color: #2C5282;
     }
     100% {
         background-position: 0% 50%;
-        background-color: #1A365D;
     }
 }
 
@@ -103,11 +100,6 @@ body {
 /* Ícones */
 .feather {
     @apply w-5 h-5;
-}
-
-/* Transições */
-.transition-all {
-    @apply transition-all duration-300 ease-in-out;
 }
 
 /* Modal */
