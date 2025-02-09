@@ -19,6 +19,11 @@ class Lista {
         $this->conexao = $database->conectar();
     }
 
+    // Método para obter a conexão
+    public function getConexao() {
+        return $this->conexao;
+    }
+
     // Criar nova lista
     public function criar() {
         $query = "INSERT INTO " . $this->tabela_listas . " 
@@ -40,6 +45,83 @@ class Lista {
         }
 
         return false;
+    }
+
+    // Criar nova lista
+    public function criarLista($nome, $descricao = null) {
+        // Validar entrada
+        if (empty($nome)) {
+            throw new Exception("Nome da lista é obrigatório");
+        }
+
+        // Limpar e sanitizar dados
+        $nome = htmlspecialchars(strip_tags($nome));
+        $descricao = $descricao ? htmlspecialchars(strip_tags($descricao)) : null;
+
+        // Preparar query
+        $query = "INSERT INTO " . $this->tabela_listas . " 
+                  SET nome = :nome, 
+                      descricao = :descricao, 
+                      usuario_id = :usuario_id";
+
+        $stmt = $this->conexao->prepare($query);
+
+        // Bind de parâmetros
+        $stmt->bindParam(":nome", $nome);
+        $stmt->bindParam(":descricao", $descricao);
+        $stmt->bindParam(":usuario_id", $this->usuario_id);
+
+        // Executar e retornar ID da lista criada
+        if ($stmt->execute()) {
+            return $this->conexao->lastInsertId();
+        }
+
+        return false;
+    }
+
+    // Atualizar lista existente
+    public function atualizarLista($lista_id, $nome, $descricao = null) {
+        // Validar entrada
+        if (empty($nome)) {
+            throw new Exception("Nome da lista é obrigatório");
+        }
+
+        // Limpar e sanitizar dados
+        $nome = htmlspecialchars(strip_tags($nome));
+        $descricao = $descricao ? htmlspecialchars(strip_tags($descricao)) : null;
+
+        // Preparar query
+        $query = "UPDATE " . $this->tabela_listas . " 
+                  SET nome = :nome, 
+                      descricao = :descricao 
+                  WHERE id = :lista_id AND usuario_id = :usuario_id";
+
+        $stmt = $this->conexao->prepare($query);
+
+        // Bind de parâmetros
+        $stmt->bindParam(":nome", $nome);
+        $stmt->bindParam(":descricao", $descricao);
+        $stmt->bindParam(":lista_id", $lista_id);
+        $stmt->bindParam(":usuario_id", $this->usuario_id);
+
+        // Executar
+        return $stmt->execute();
+    }
+
+    // Excluir lista
+    public function excluirLista($lista_id) {
+        // Preparar query
+        $query = "DELETE FROM " . $this->tabela_listas . " 
+                  WHERE id = :lista_id AND usuario_id = :usuario_id";
+
+        $stmt = $this->conexao->prepare($query);
+
+        // Bind de parâmetros
+        $stmt->bindParam(":lista_id", $lista_id);
+        $stmt->bindParam(":usuario_id", $this->usuario_id);
+
+        // Executar
+        return $stmt->execute();
     }
 
     // Adicionar item à lista

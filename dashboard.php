@@ -83,7 +83,7 @@ $listas = $lista->listarListasUsuario();
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-gray-500 text-sm">Total de Listas</h3>
-                            <p class="text-2xl font-bold text-blue-600"><?php echo count($listas); ?></p>
+                            <p id="totalListas" class="text-2xl font-bold text-blue-600"><?php echo count($listas); ?></p>
                         </div>
                         <i data-feather="clipboard" class="w-8 h-8 text-blue-500"></i>
                     </div>
@@ -92,7 +92,7 @@ $listas = $lista->listarListasUsuario();
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-gray-500 text-sm">Itens Pendentes</h3>
-                            <p class="text-2xl font-bold text-yellow-600">
+                            <p id="itensPendentes" class="text-2xl font-bold text-yellow-600">
                                 <?php 
                                 $totalPendentes = 0;
                                 foreach($listas as $lista) {
@@ -102,18 +102,20 @@ $listas = $lista->listarListasUsuario();
                                 ?>
                             </p>
                         </div>
-                        <i data-feather="shopping-cart" class="w-8 h-8 text-yellow-500"></i>
+                        <i data-feather="clock" class="w-8 h-8 text-yellow-500"></i>
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-md">
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-gray-500 text-sm">Listas Concluídas</h3>
-                            <p class="text-2xl font-bold text-green-600">
+                            <p id="listasConcluidas" class="text-2xl font-bold text-green-600">
                                 <?php 
                                 $totalConcluidas = 0;
                                 foreach($listas as $lista) {
-                                    if($lista['status'] == 'concluida') $totalConcluidas++;
+                                    if ($lista['itens_pendentes'] == 0) {
+                                        $totalConcluidas++;
+                                    }
                                 }
                                 echo $totalConcluidas;
                                 ?>
@@ -131,7 +133,7 @@ $listas = $lista->listarListasUsuario();
                     <a href="#" class="text-blue-600 hover:underline">Ver Todas</a>
                 </div>
 
-                <div class="grid gap-4">
+                <div class="grid gap-4" id="listasContainer">
                     <?php if(empty($listas)): ?>
                         <div class="bg-white p-6 rounded-xl shadow-md text-center">
                             <i data-feather="inbox" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
@@ -144,7 +146,15 @@ $listas = $lista->listarListasUsuario();
                         <?php foreach($listas as $lista): ?>
                             <div class="bg-white p-4 rounded-xl shadow-md flex justify-between items-center hover:shadow-lg transition">
                                 <div>
-                                    <h3 class="font-semibold text-gray-800"><?php echo htmlspecialchars($lista['nome']); ?></h3>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-semibold text-gray-800"><?php echo htmlspecialchars($lista['nome']); ?></h3>
+                                        <span class="text-xs text-gray-500">
+                                            <?php 
+                                            $data = new DateTime($lista['data_criacao']);
+                                            echo $data->format('d/m/Y');
+                                            ?>
+                                        </span>
+                                    </div>
                                     <p class="text-sm text-gray-500">
                                         <?php echo $lista['itens_pendentes']; ?> itens pendentes
                                     </p>
@@ -153,7 +163,10 @@ $listas = $lista->listarListasUsuario();
                                     <a href="lista.php?id=<?php echo $lista['id']; ?>" class="text-blue-600 hover:text-blue-800">
                                         <i data-feather="edit" class="w-5 h-5"></i>
                                     </a>
-                                    <button class="text-red-600 hover:text-red-800">
+                                    <button 
+                                        class="text-red-600 hover:text-red-800 excluir-lista" 
+                                        data-lista-id="<?php echo $lista['id']; ?>"
+                                    >
                                         <i data-feather="trash-2" class="w-5 h-5"></i>
                                     </button>
                                 </div>
@@ -165,10 +178,13 @@ $listas = $lista->listarListasUsuario();
         </main>
     </div>
 
-    <!-- Modal Nova Lista -->
-    <div id="novaListaModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-        <div class="bg-white p-8 rounded-xl w-96 max-w-full">
-            <h2 class="text-2xl font-bold mb-4">Criar Nova Lista</h2>
+    <!-- Modal Criar Lista -->
+    <div id="criarListaModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-lg w-96 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Criar Nova Lista</h2>
+            </div>
+            
             <form id="novaListaForm" class="space-y-4">
                 <div>
                     <label for="nomeLista" class="block text-gray-700 mb-2">Nome da Lista</label>
@@ -181,11 +197,11 @@ $listas = $lista->listarListasUsuario();
                     >
                 </div>
                 <div class="flex justify-end space-x-2">
-                    <button type="button" id="fecharModal" class="btn-secondary px-4 py-2 rounded-lg">
-                        Cancelar
+                    <button type="button" id="cancelarModal" class="btn-secondary px-4 py-2 rounded-lg">
+                        <span>Cancelar</span>
                     </button>
                     <button type="submit" class="btn-primary px-4 py-2 rounded-lg">
-                        Criar Lista
+                        <span>Criar Lista</span>
                     </button>
                 </div>
             </form>
@@ -193,34 +209,326 @@ $listas = $lista->listarListasUsuario();
     </div>
 
     <script>
-        // Inicializar ícones Feather
-        feather.replace();
+        // Função de notificação Toast
+        function showToast(message, type = 'success') {
+            // Criar container de toast se não existir
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'fixed top-4 right-4 z-50 space-y-2';
+                document.body.appendChild(toastContainer);
+            }
+
+            // Criar elemento de toast
+            const toast = document.createElement('div');
+            toast.className = `
+                px-4 py-2 rounded-lg shadow-lg text-white transition-all duration-300 
+                ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}
+                transform translate-x-full opacity-0
+            `;
+            toast.textContent = message;
+
+            // Adicionar ao container
+            toastContainer.appendChild(toast);
+
+            // Animação de entrada
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            }, 10);
+
+            // Remover após alguns segundos
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Função para recarregar as listas
+        function recarregarListas() {
+            console.log('Iniciando recarregamento de listas');  // Log de diagnóstico
+            
+            // Adicionar indicador de carregamento
+            const listasContainer = document.getElementById('listasContainer');
+            listasContainer.innerHTML = `
+                <div class="flex justify-center items-center p-6">
+                    <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-blue-500 rounded-full" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+            `;
+            
+            fetch('lista_crud_ajax.php?action=listar_listas', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Cache-Control': 'no-cache'  // Evitar cache
+                }
+            })
+            .then(response => {
+                console.log('Resposta do servidor:', response);  // Log de diagnóstico
+                console.log('Status da resposta:', response.status);  // Log de status
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                console.log('Dados recebidos:', data);  // Log de diagnóstico
+                
+                // Limpar container atual
+                listasContainer.innerHTML = '';
+
+                // Verificar se há listas
+                if (!data.listas || data.listas.length === 0) {
+                    console.log('Nenhuma lista encontrada');  // Log de diagnóstico
+                    listasContainer.innerHTML = `
+                        <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                            <i data-feather="inbox" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+                            <p class="text-gray-600">Você ainda não tem nenhuma lista.</p>
+                            <button id="primeiraListaBtn" class="btn-primary mt-4 px-4 py-2 rounded-lg">
+                                Criar Primeira Lista
+                            </button>
+                        </div>
+                    `;
+                    feather.replace();
+                    adicionarEventoPrimeiraLista();
+                } else {
+                    console.log(`Encontradas ${data.listas.length} listas`);  // Log de diagnóstico
+                    
+                    // Criar container de grid para as listas
+                    const gridContainer = document.createElement('div');
+                    gridContainer.className = 'grid gap-4';
+                    listasContainer.appendChild(gridContainer);
+                    
+                    // Adicionar listas
+                    data.listas.forEach(lista => {
+                        const novaLista = document.createElement('div');
+                        novaLista.className = 'bg-white p-4 rounded-xl shadow-md flex justify-between items-center hover:shadow-lg transition';
+                        
+                        // Formatar data
+                        const data = new Date(lista.data_criacao);
+                        const dataFormatada = data.toLocaleDateString('pt-BR');
+
+                        novaLista.innerHTML = `
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h3 class="font-semibold text-gray-800">${lista.nome}</h3>
+                                    <span class="text-xs text-gray-500">${dataFormatada}</span>
+                                </div>
+                                <p class="text-sm text-gray-500">
+                                    ${lista.itens_pendentes} itens pendentes
+                                </p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <a href="lista.php?id=${lista.id}" class="text-blue-600 hover:text-blue-800">
+                                    <i data-feather="edit" class="w-5 h-5"></i>
+                                </a>
+                                <button 
+                                    class="text-red-600 hover:text-red-800 excluir-lista" 
+                                    data-lista-id="${lista.id}"
+                                >
+                                    <i data-feather="trash-2" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        `;
+                        
+                        gridContainer.appendChild(novaLista);
+                        
+                        // Adicionar evento de exclusão
+                        const botaoExcluir = novaLista.querySelector('.excluir-lista');
+                        adicionarEventoExclusaoLista(novaLista);
+                    });
+
+                    // Atualizar contadores
+                    document.getElementById('totalListas').textContent = data.listas.length;
+                    
+                    let itensPendentes = 0;
+                    data.listas.forEach(lista => {
+                        itensPendentes += parseInt(lista.itens_pendentes) || 0;
+                    });
+                    document.getElementById('itensPendentes').textContent = itensPendentes;
+                    
+                    let listasConcluidas = 0;
+                    data.listas.forEach(lista => {
+                        if (lista.itens_pendentes == 0) {
+                            listasConcluidas++;
+                        }
+                    });
+                    document.getElementById('listasConcluidas').textContent = listasConcluidas;
+                }
+
+                // Recarregar ícones
+                feather.replace();
+            })
+            .catch(error => {
+                console.error('Erro ao recarregar listas:', error);  // Log de erro
+                
+                // Mostrar mensagem de erro no container
+                listasContainer.innerHTML = `
+                    <div class="bg-red-100 p-6 rounded-xl text-center">
+                        <i data-feather="alert-triangle" class="w-16 h-16 mx-auto text-red-500 mb-4"></i>
+                        <p class="text-red-700">Erro ao carregar listas. Tente novamente.</p>
+                        <button onclick="recarregarListas()" class="btn-primary mt-4 px-4 py-2 rounded-lg">
+                            Tentar Novamente
+                        </button>
+                    </div>
+                `;
+                
+                feather.replace();
+                showToast('Erro ao atualizar listas', 'error');
+            });
+        }
+
+        // Função para adicionar evento de primeira lista
+        function adicionarEventoPrimeiraLista() {
+            const primeiraListaBtn = document.getElementById('primeiraListaBtn');
+            if (primeiraListaBtn) {
+                primeiraListaBtn.addEventListener('click', () => {
+                    const novaListaModal = document.getElementById('criarListaModal');
+                    novaListaModal.classList.remove('hidden');
+                });
+            }
+        }
+
+        // Função para adicionar evento de exclusão de lista
+        function adicionarEventoExclusaoLista(elementoLista) {
+            const botaoExcluir = elementoLista.querySelector('.excluir-lista');
+            if (!botaoExcluir) return; // Garantir que o botão existe
+            
+            // Remover eventos antigos para evitar duplicação
+            botaoExcluir.replaceWith(botaoExcluir.cloneNode(true));
+            const novoBotao = elementoLista.querySelector('.excluir-lista');
+            
+            novoBotao.addEventListener('click', function() {
+                const listaId = this.getAttribute('data-lista-id');
+                
+                console.log('Tentando excluir lista:', listaId);  // Log de diagnóstico
+                
+                // Confirmar exclusão
+                if (confirm('Tem certeza que deseja excluir esta lista?')) {
+                    fetch('lista_crud_ajax.php?action=excluir_lista', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            lista_id: listaId
+                        })
+                    })
+                    .then(response => {
+                        console.log('Resposta do servidor:', response);  // Log de diagnóstico
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Dados recebidos:', data);  // Log de diagnóstico
+                        
+                        if (data.success) {
+                            // Mostrar notificação
+                            showToast('Lista excluída com sucesso!');
+
+                            // Recarregar listas
+                            console.log('Chamando recarregarListas após exclusão');  // Log de diagnóstico
+                            recarregarListas();
+                        } else {
+                            // Mostrar erro
+                            console.error('Erro na exclusão:', data.message);  // Log de erro
+                            showToast(data.message || 'Erro ao excluir lista', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro completo:', error);  // Log de erro completo
+                        showToast('Erro ao excluir lista', 'error');
+                    });
+                }
+            });
+        }
 
         // Modal Nova Lista
         const novaListaBtn = document.getElementById('novaListaBtn');
-        const primeiraListaBtn = document.getElementById('primeiraListaBtn');
-        const novaListaModal = document.getElementById('novaListaModal');
-        const fecharModal = document.getElementById('fecharModal');
+        const novaListaModal = document.getElementById('criarListaModal');
+        const cancelarModal = document.getElementById('cancelarModal');
         const novaListaForm = document.getElementById('novaListaForm');
 
+        // Abrir modal
         function toggleModal() {
             novaListaModal.classList.toggle('hidden');
-            novaListaModal.classList.toggle('flex');
         }
 
-        novaListaBtn?.addEventListener('click', toggleModal);
-        primeiraListaBtn?.addEventListener('click', toggleModal);
-        fecharModal.addEventListener('click', toggleModal);
+        novaListaBtn.addEventListener('click', toggleModal);
 
+        // Fechar modal
+        cancelarModal.addEventListener('click', toggleModal);
+
+        // Criar lista
         novaListaForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const nomeLista = document.getElementById('nomeLista').value.trim();
             
-            if (nomeLista) {
-                // Aqui você pode adicionar a lógica AJAX para criar a lista
-                alert('Funcionalidade de criação de lista em desenvolvimento');
-                toggleModal();
-            }
+            const nome = document.getElementById('nomeLista').value.trim();
+
+            console.log('Criando lista:', nome);  // Log de diagnóstico
+
+            fetch('lista_crud_ajax.php?action=criar_lista', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    nome: nome
+                })
+            })
+            .then(response => {
+                console.log('Resposta do servidor:', response);  // Log de diagnóstico
+                return response.json();
+            })
+            .then(data => {
+                console.log('Dados recebidos:', data);  // Log de diagnóstico
+                
+                if (data.success) {
+                    // Fechar modal
+                    toggleModal();
+
+                    // Limpar campo
+                    document.getElementById('nomeLista').value = '';
+
+                    // Mostrar notificação
+                    showToast('Lista criada com sucesso!');
+
+                    // Recarregar listas
+                    console.log('Chamando recarregarListas após criação');  // Log de diagnóstico
+                    recarregarListas();
+                } else {
+                    // Mostrar erro
+                    console.error('Erro na criação:', data.message);  // Log de erro
+                    showToast(data.message || 'Erro ao criar lista', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erro completo:', error);  // Log de erro completo
+                showToast('Erro ao criar lista', 'error');
+            });
+        });
+
+        // Adicionar eventos de exclusão para listas existentes
+        document.querySelectorAll('.excluir-lista').forEach(botao => {
+            const elementoLista = botao.closest('.bg-white');
+            adicionarEventoExclusaoLista(elementoLista);
+        });
+
+        // Inicializar ícones Feather
+        feather.replace();
+        
+        // Chamar recarregamento de listas ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Carregamento inicial da página');  // Log de diagnóstico
+            recarregarListas();
         });
     </script>
 </body>

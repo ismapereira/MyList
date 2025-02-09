@@ -151,6 +151,25 @@ $itens = $lista->buscarItens();
         // Inicializar ícones Feather
         feather.replace();
 
+        const listaId = <?php echo $detalhesLista['id']; ?>;
+        const totalItensElement = document.getElementById('totalItens');
+        const itensConcluidosElement = document.getElementById('itensConcluidos');
+        const listaItensElement = document.getElementById('listaItens');
+
+        // Função para mostrar toast de notificação
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 3000);
+        }
+
         // Adicionar item
         document.getElementById('adicionarItemForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -159,36 +178,152 @@ $itens = $lista->buscarItens();
             const unidade = document.getElementById('unidadeItem').value;
 
             if (nome && quantidade && unidade) {
-                // Aqui você faria uma chamada AJAX para adicionar o item
-                alert(`Item adicionado: ${nome} (${quantidade} ${unidade})`);
-                
-                // Limpar formulário
-                document.getElementById('nomeItem').value = '';
-                document.getElementById('quantidadeItem').value = '';
-                document.getElementById('unidadeItem').value = 'un';
+                fetch('lista_ajax.php?action=adicionar_item', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        lista_id: listaId,
+                        nome: nome,
+                        quantidade: quantidade,
+                        unidade: unidade
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Adicionar item à lista visualmente
+                        const novoItem = document.createElement('div');
+                        novoItem.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg';
+                        novoItem.innerHTML = `
+                            <div class="flex items-center space-x-3">
+                                <input 
+                                    type="checkbox" 
+                                    class="item-checkbox" 
+                                    data-item-id="${data.item_id}"
+                                >
+                                <span>${nome}</span>
+                            </div>
+                            <div class="text-gray-600">
+                                ${quantidade} ${unidade}
+                                <button class="ml-2 text-red-500 hover:text-red-700 excluir-item" data-item-id="${data.item_id}">
+                                    <i data-feather="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        `;
+                        
+                        listaItensElement.appendChild(novoItem);
+                        feather.replace(); // Recarregar ícones
+                        
+                        // Atualizar contadores
+                        totalItensElement.textContent = parseInt(totalItensElement.textContent) + 1;
+                        
+                        // Limpar formulário
+                        document.getElementById('nomeItem').value = '';
+                        document.getElementById('quantidadeItem').value = '';
+                        document.getElementById('unidadeItem').value = 'un';
+                        
+                        showToast(data.message);
+                        
+                        // Adicionar event listeners para novos elementos
+                        setupItemListeners(novoItem);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    showToast('Erro ao adicionar item', 'error');
+                });
             }
         });
 
-        // Marcar/desmarcar item
-        document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+        // Função para configurar listeners de itens
+        function setupItemListeners(itemElement) {
+            // Marcar/desmarcar item
+            const checkbox = itemElement.querySelector('.item-checkbox');
+            const span = itemElement.querySelector('span');
+            const excluirBotao = itemElement.querySelector('.excluir-item');
+
             checkbox.addEventListener('change', function() {
                 const itemId = this.dataset.itemId;
                 const status = this.checked ? 'concluido' : 'pendente';
                 
-                // Aqui você faria uma chamada AJAX para atualizar o status
-                alert(`Item ${itemId} marcado como ${status}`);
+                fetch('lista_ajax.php?action=atualizar_status', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        lista_id: listaId,
+                        item_id: itemId,
+                        status: status
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Atualizar visual do item
+                        if (status === 'concluido') {
+                            span.classList.add('line-through', 'text-gray-500');
+                            itensConcluidosElement.textContent = 
+                                parseInt(itensConcluidosElement.textContent) + 1;
+                        } else {
+                            span.classList.remove('line-through', 'text-gray-500');
+                            itensConcluidosElement.textContent = 
+                                parseInt(itensConcluidosElement.textContent) - 1;
+                        }
+                        showToast(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    showToast('Erro ao atualizar status', 'error');
+                    checkbox.checked = !checkbox.checked; // Reverter checkbox
+                });
             });
-        });
 
-        // Excluir item
-        document.querySelectorAll('.excluir-item').forEach(botao => {
-            botao.addEventListener('click', function() {
+            // Excluir item
+            excluirBotao.addEventListener('click', function() {
                 const itemId = this.dataset.itemId;
                 
-                // Aqui você faria uma chamada AJAX para excluir o item
-                alert(`Excluir item ${itemId}`);
+                fetch('lista_ajax.php?action=remover_item', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        lista_id: listaId,
+                        item_id: itemId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remover item da lista
+                        listaItensElement.removeChild(itemElement);
+                        
+                        // Atualizar contadores
+                        totalItensElement.textContent = parseInt(totalItensElement.textContent) - 1;
+                        
+                        // Se o item estava concluído, atualizar contador de concluídos
+                        const checkbox = itemElement.querySelector('.item-checkbox');
+                        if (checkbox.checked) {
+                            itensConcluidosElement.textContent = 
+                                parseInt(itensConcluidosElement.textContent) - 1;
+                        }
+                        
+                        showToast(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    showToast('Erro ao remover item', 'error');
+                });
             });
-        });
+        }
+
+        // Configurar listeners para itens existentes
+        document.querySelectorAll('#listaItens > div').forEach(setupItemListeners);
     </script>
 </body>
 </html>
