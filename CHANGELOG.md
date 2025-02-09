@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.32] - 2024-01-09
+### Adicionado
+- Sidebar responsiva para dispositivos móveis
+  - Botão de toggle para abrir/fechar sidebar
+  - Overlay para fechar sidebar ao clicar fora
+  - Animações suaves de entrada e saída
+  - Comportamento adaptativo para diferentes tamanhos de tela
+
+### Modificado
+- Componente de sidebar atualizado para melhor experiência móvel
+- Estilos CSS personalizados para transições e animações
+
 ## [0.3.31] - 2024-01-09
 ### Adicionado
 - Funcionalidade de exclusão de conta na página de configurações

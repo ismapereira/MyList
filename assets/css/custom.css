@@ -223,3 +223,45 @@ input:focus + .toggle-switch {
 .badge-info {
     @apply bg-blue-100 text-blue-800;
 }
+
+/* Estilos para sidebar responsiva */
+@media (max-width: 768px) {
+    #sidebar {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    #sidebar-toggle {
+        transition: all 0.3s ease;
+    }
+
+    #sidebar-toggle:hover {
+        background-color: rgba(59, 130, 246, 0.8);
+    }
+}
+
+/* Animações de entrada e saída da sidebar */
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+#sidebar.animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+#sidebar.animate-slide-out {
+    animation: slideOut 0.3s ease-in;
+}

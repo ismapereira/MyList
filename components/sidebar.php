@@ -1,4 +1,4 @@
-<aside class="w-64 bg-white shadow-md p-6 space-y-6 flex-shrink-0">
+<aside class="w-64 bg-white shadow-md p-6 space-y-6 flex-shrink-0 fixed md:relative top-0 left-0 h-full z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out" id="sidebar">
     <div class="flex items-center space-x-4">
         <div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold">
             <?php echo strtoupper(substr($usuario->nome, 0, 1)); ?>
@@ -24,3 +24,43 @@
         </a>
     </nav>
 </aside>
+
+<!-- Botão de toggle para mobile -->
+<button id="sidebar-toggle" class="fixed top-4 left-4 z-40 md:hidden p-2 bg-white shadow-md rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors duration-200">
+    <i data-feather="menu" class="w-5 h-5 text-blue-600"></i>
+</button>
+
+<!-- Overlay para mobile -->
+<div id="sidebar-overlay" class="fixed inset-0 z-40 bg-black bg-opacity-50 hidden"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+    // Função para abrir a sidebar
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        sidebarOverlay.classList.remove('hidden');
+    }
+
+    // Função para fechar a sidebar
+    function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        sidebarOverlay.classList.add('hidden');
+    }
+
+    // Toggle da sidebar em telas menores
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    // Ajustar sidebar em mudanças de tamanho de tela
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768) {
+            sidebar.classList.remove('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        }
+    });
+});
+</script>
