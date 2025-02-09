@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.3.24] - 2025-02-09
+
+### Adicionado
+- Configuração completa do Tailwind CSS
+- Suporte a diretivas `@apply` no CSS personalizado
+- Arquivos de configuração para build de CSS
+
+### Corrigido
+- Erro de processamento de CSS personalizado
+- Configuração de estilos globais
+
+## [0.3.23] - 2025-02-09
+
+### Removido
+- Arquivo `home.php` completamente descontinuado
+- Referências obsoletas a métodos de listagem de listas
+
+### Corrigido
+- Removidas chamadas a métodos inexistentes
+- Ajustada estrutura de navegação para usar dashboard como página inicial
+
+## [0.3.22] - 2025-02-09
+
+### Corrigido
+- Inclusão do modal de criação de lista
+- Funcionalidades de criação e exclusão de listas na página Minhas Listas
+- Carregamento dinâmico de listas
+- Tratamento de erros na página de listas
+
+### Adicionado
+- Scripts para recarregamento de listas
+- Funções de toast e manipulação de listas
+- Eventos de criação e exclusão de listas
+
+### Melhorado
+- Experiência do usuário na página de listas
+- Consistência de funcionalidades entre dashboard e minhas listas
+
 ## [0.3.21] - 2025-02-09
 
 ### Corrigido

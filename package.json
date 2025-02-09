@@ -1,0 +1,13 @@
+{
+    "name": "mylist",
+    "version": "0.3.23",
+    "description": "Gerenciador de Listas Pessoais",
+    "scripts": {
+        "build:css": "tailwindcss -i ./assets/css/custom.css -o ./assets/css/tailwind.min.css",
+        "watch:css": "tailwindcss -i ./assets/css/custom.css -o ./assets/css/tailwind.min.css --watch"
+    },
+    "devDependencies": {
+        "tailwindcss": "^3.3.3",
+        "postcss": "^8.4.31"
+    }
+}
