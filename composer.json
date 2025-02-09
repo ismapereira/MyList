@@ -1,5 +1,21 @@
 {
     "require": {
         "tecnickcom/tcpdf": "^6.8"
+    },
+    "name": "ismapereira/mylist",
+    "description": "Sistema de gerenciamento de listas de compras",
+    "type": "project",
+    "version": "1.0.0",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ismael Pereira",
+            "email": "ismaelpereira13@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "MyList\\": "src/"
+        }
     }
 }

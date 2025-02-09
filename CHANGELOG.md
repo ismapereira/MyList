@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.0] - 2025-02-09
+### Lançamento Oficial
+- Primeira versão estável do sistema
+- Interface completamente redesenhada e responsiva
+- Sistema de autenticação robusto
+- Gerenciamento completo de listas e itens
+- Exportação de PDF com design profissional e minimalista
+- Correções de bugs e melhorias de performance
+
+### Recursos Principais
+- Sistema completo de autenticação de usuários
+- Criação e gerenciamento de múltiplas listas
+- Adição, edição e remoção de itens
+- Marcação de itens como comprados
+- Exportação de listas em PDF com design elegante
+- Interface responsiva e moderna
+- Design limpo e intuitivo
+
 ## [Unreleased]
 ### Added
 - Funcionalidade de exportar lista de compras para PDF

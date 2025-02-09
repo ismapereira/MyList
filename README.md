@@ -1,5 +1,10 @@
 # MyList 🛒 - Gerenciador de Listas de Compras
 
+[![Version](https://img.shields.io/badge/version-1.0-blue.svg)](https://github.com/ismapereira/MyList)
+[![Status](https://img.shields.io/badge/status-stable-green.svg)](https://github.com/ismapereira/MyList)
+[![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-blue.svg)](https://php.net)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 ## 📝 Descrição do Projeto
 
 MyList é uma aplicação web moderna para gerenciamento de listas de compras, permitindo que usuários criem, organizem e acompanhem suas compras de forma simples e intuitiva.
@@ -80,3 +85,26 @@ Consulte `CONTRIBUTING.md` para saber como contribuir com o projeto.
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+
+## Versão 1.0
+
+### Recursos Principais
+- Sistema completo de autenticação
+- Gerenciamento de listas e itens
+- Exportação em PDF com design profissional
+- Interface responsiva e moderna
+
+### Próximas Atualizações
+- Compartilhamento de listas entre usuários
+- Categorização de itens
+- Histórico de compras
+- Estimativa de preços
+- Modo offline
+- Aplicativo móvel
+
+## Autor
+
+Desenvolvido por Ismael Pereira
+
+---
+© 2025 MyList. Todos os direitos reservados.
