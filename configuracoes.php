@@ -190,6 +190,36 @@ $usuario->obterPorId();
                         </div>
                     </div>
                 </section>
+                <!-- Exclusão de Conta -->
+                <section class="bg-white p-6 rounded-xl shadow-md border-2 border-red-100">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <i data-feather="trash-2" class="w-6 h-6 text-red-500"></i>
+                        <h2 class="text-xl font-semibold text-red-600">Excluir Conta</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-red-50 rounded-lg">
+                            <p class="text-red-600 font-medium">Atenção: Esta ação é irreversível!</p>
+                            <p class="text-red-500 text-sm mt-1">
+                                Ao excluir sua conta, todos os seus dados e listas serão permanentemente removidos.
+                            </p>
+                        </div>
+                        <form id="formExcluirConta" class="space-y-4">
+                            <div>
+                                <label for="senha_exclusao" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Confirme sua senha para excluir a conta
+                                </label>
+                                <input type="password" id="senha_exclusao" name="senha_exclusao" 
+                                    class="form-input w-full rounded-lg border-gray-300 focus:border-red-500 focus:ring focus:ring-red-200" 
+                                    placeholder="Digite sua senha">
+                            </div>
+                            <button type="submit" 
+                                    class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+                                <i data-feather="trash-2" class="w-4 h-4"></i>
+                                <span>Confirmar Exclusão de Conta</span>
+                            </button>
+                        </form>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
@@ -240,6 +270,21 @@ $usuario->obterPorId();
                 throw error;
             }
         }
+
+        // Excluir conta
+        document.getElementById('formExcluirConta').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const data = {
+                    senha: document.getElementById('senha_exclusao').value
+                };
+
+                const result = await makeRequest('usuario_crud_ajax.php?action=excluir_conta', 'POST', data);
+                showToast(result.message);
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        });
 
         // Carregar dados do usuário
         async function carregarDadosUsuario() {

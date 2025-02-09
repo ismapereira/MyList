@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.31] - 2024-01-09
+### Adicionado
+- Funcionalidade de exclusão de conta na página de configurações
+  - Seção dedicada para exclusão de conta
+  - Confirmação de senha antes da exclusão
+  - Tratamento de exclusão via AJAX
+  - Feedback visual com toast notifications
+
+### Modificado
+- Atualização do modelo de usuário para suportar exclusão de conta
+- Aprimoramento do tratamento de requisições AJAX no sistema de usuário
+
 ## [0.3.30] - 2024-01-09
 ### Adicionado
 - Implementação completa da página de configurações

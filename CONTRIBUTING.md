@@ -80,6 +80,40 @@ Agradecemos seu interesse em contribuir para o MyList! Este documento fornece di
 
 Contribuidores serão listados nos créditos do projeto!
 
+## Funcionalidades do Sistema
+
+### Gerenciamento de Usuário
+- [x] Registro de usuário
+- [x] Autenticação de usuário
+- [x] Recuperação de senha
+- [x] Página de configurações
+- [x] Atualização de perfil
+- [x] Alteração de preferências
+- [x] **Exclusão de conta**
+
+### Detalhes da Exclusão de Conta
+
+#### Fluxo de Exclusão
+1. Usuário navega até a seção "Excluir Conta" na página de configurações
+2. Sistema solicita confirmação de senha
+3. Ao confirmar, todas as informações do usuário são permanentemente removidas
+4. Usuário é deslogado e redirecionado para página de login
+
+#### Segurança
+- Requer confirmação de senha atual
+- Exclusão em transação de banco de dados para garantir integridade
+- Remoção em cascata de todos os dados do usuário
+
+#### Tratamento de Erros
+- Validação de senha no backend
+- Feedback visual de sucesso ou erro
+- Prevenção de exclusão acidental
+
+### Próximas Melhorias
+- [ ] Período de carência para recuperação de conta
+- [ ] Opção de exportação de dados antes da exclusão
+- [ ] Log de auditoria para exclusões de conta
+
 ---
 
 **Última atualização:** Fevereiro 2025
