@@ -1,4 +1,4 @@
-<aside class="w-64 bg-white shadow-md p-6 space-y-6 hidden md:block">
+<aside class="w-64 bg-white shadow-md p-6 space-y-6 flex-shrink-0">
     <div class="flex items-center space-x-4">
         <div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold">
             <?php echo strtoupper(substr($usuario->nome, 0, 1)); ?>
@@ -13,10 +13,6 @@
         <a href="dashboard.php" class="flex items-center space-x-3 text-gray-700 p-2 hover:bg-blue-50 rounded-lg transition <?php echo (basename($_SERVER['PHP_SELF']) == 'dashboard.php') ? 'bg-blue-50 text-blue-600' : ''; ?>">
             <i data-feather="home" class="w-5 h-5"></i>
             <span>Início</span>
-        </a>
-        <a href="minhas_listas.php" class="flex items-center space-x-3 text-gray-700 p-2 hover:bg-blue-50 rounded-lg transition <?php echo (basename($_SERVER['PHP_SELF']) == 'minhas_listas.php') ? 'bg-blue-50 text-blue-600' : ''; ?>">
-            <i data-feather="list" class="w-5 h-5"></i>
-            <span>Minhas Listas</span>
         </a>
         <a href="configuracoes.php" class="flex items-center space-x-3 text-gray-700 p-2 hover:bg-blue-50 rounded-lg transition <?php echo (basename($_SERVER['PHP_SELF']) == 'configuracoes.php') ? 'bg-blue-50 text-blue-600' : ''; ?>">
             <i data-feather="settings" class="w-5 h-5"></i>

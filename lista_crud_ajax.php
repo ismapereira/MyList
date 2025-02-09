@@ -135,6 +135,26 @@ try {
             break;
 
         case 'POST':
+            // Criar nova lista
+            if ($action === 'criar_lista') {
+                $dados = json_decode(file_get_contents('php://input'), true);
+                debugLog("Dados recebidos para criar lista: " . print_r($dados, true));
+
+                if (!isset($dados['nome'])) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Nome da lista é obrigatório']);
+                    exit();
+                }
+
+                $resultado = $lista->criarLista($dados['nome'], $dados['descricao'] ?? null);
+                if ($resultado) {
+                    echo json_encode(['success' => true, 'message' => 'Lista criada com sucesso']);
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Erro ao criar lista']);
+                }
+                exit();
+            }
             // Adicionar item à lista
             if ($action === 'adicionar_item') {
                 $dados = json_decode(file_get_contents('php://input'), true);

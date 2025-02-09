@@ -97,12 +97,8 @@ class Lista {
         $stmt->bindParam(":descricao", $descricao);
         $stmt->bindParam(":usuario_id", $this->usuario_id);
 
-        // Executar e retornar ID da lista criada
-        if ($stmt->execute()) {
-            return $this->conexao->lastInsertId();
-        }
-
-        return false;
+        // Executar e retornar resultado
+        return $stmt->execute();
     }
 
     // Atualizar lista existente

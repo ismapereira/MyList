@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.29] - 2025-02-09
+
+### Removido
+- Página "Minhas Listas" removida por redundância com o Dashboard
+- Link para "Minhas Listas" removido da barra lateral
+
+### Corrigido
+- Função de criar lista no Dashboard
+- Método `criarLista()` na classe Lista
+- Tratamento de resposta AJAX ao criar lista
+
+### Melhorado
+- Estrutura do projeto mais enxuta e organizada
+- Documentação atualizada refletindo as mudanças
+- Interface mais intuitiva focada no Dashboard
+
 ## [0.3.28] - 2025-02-09
 
 ### Corrigido

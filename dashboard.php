@@ -36,7 +36,7 @@ $listas = $lista->listarListasUsuario();
         <?php include 'components/sidebar.php'; ?>
 
         <!-- Main Content -->
-        <main class="flex-1 p-6 md:p-10 bg-gray-50">
+        <main class="flex-1 p-6 md:p-10 overflow-x-hidden">
             <header class="flex justify-between items-center mb-8">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
