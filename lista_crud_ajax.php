@@ -23,7 +23,7 @@ function debugLog($message) {
 }
 
 // Verificar autenticação
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['user_id'])) {
     debugLog("Usuário não autenticado");
     debugLog("Conteúdo da sessão: " . print_r($_SESSION, true));
     http_response_code(401);
@@ -39,8 +39,8 @@ debugLog("Método: $method, Ação: $action");
 
 try {
     $lista = new Lista();
-    $lista->usuario_id = $_SESSION['usuario_id'];
-    debugLog("ID do usuário: " . $_SESSION['usuario_id']);
+    $lista->usuario_id = $_SESSION['user_id'];
+    debugLog("ID do usuário: " . $_SESSION['user_id']);
 
     switch ($method) {
         case 'GET':
@@ -68,7 +68,7 @@ try {
 
                 try {
                     $lista->id = $lista_id;
-                    $lista->usuario_id = $_SESSION['usuario_id'];
+                    $lista->usuario_id = $_SESSION['user_id'];
                     $dados = $lista->obterPorId();
                     $itens = $lista->buscarItensLista();
                     
@@ -113,7 +113,7 @@ try {
 
                 try {
                     $lista->id = $lista_id;
-                    $lista->usuario_id = $_SESSION['usuario_id'];
+                    $lista->usuario_id = $_SESSION['user_id'];
                     $itens = $lista->buscarItensLista();
                     
                     debugLog("Itens encontrados: " . count($itens));
@@ -172,7 +172,7 @@ try {
 
                 try {
                     $lista->id = $dados['lista_id'];
-                    $lista->usuario_id = $_SESSION['usuario_id'];
+                    $lista->usuario_id = $_SESSION['user_id'];
                     
                     // Definir a tabela de itens usando o método setter
                     $lista->setTabelaItens('itens_lista');
@@ -305,7 +305,7 @@ try {
 
                 try {
                     $lista->id = $dados['lista_id'];
-                    $lista->usuario_id = $_SESSION['usuario_id'];
+                    $lista->usuario_id = $_SESSION['user_id'];
                     
                     // Definir a tabela de itens usando o método setter
                     $lista->setTabelaItens('itens_lista');
@@ -374,7 +374,7 @@ try {
 
                 try {
                     $lista->id = $dados['lista_id'];
-                    $lista->usuario_id = $_SESSION['usuario_id'];
+                    $lista->usuario_id = $_SESSION['user_id'];
                     
                     // Definir a tabela de itens usando o método setter
                     $lista->setTabelaItens('itens_lista');
@@ -463,7 +463,7 @@ try {
 
                 try {
                     $lista->id = $dados['lista_id'];
-                    $lista->usuario_id = $_SESSION['usuario_id'];
+                    $lista->usuario_id = $_SESSION['user_id'];
                     
                     // Definir a tabela de itens usando o método setter
                     $lista->setTabelaItens('itens_lista');

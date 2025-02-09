@@ -6,14 +6,14 @@ require_once 'config/database.php';
 require_once 'models/Usuario.php';
 
 // Verificar autenticação
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['error' => 'Usuário não autenticado']);
     exit();
 }
 
 $usuario = new Usuario();
-$usuario->id = $_SESSION['usuario_id'];
+$usuario->id = $_SESSION['user_id'];
 
 // Carrega os dados atuais do usuário
 if (!$usuario->obterPorId()) {

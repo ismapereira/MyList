@@ -4,8 +4,13 @@ require_once 'config/database.php';
 require_once 'models/Lista.php';
 require_once 'models/Usuario.php';
 
+// Log para debug
+error_log("Dashboard - Iniciando...");
+error_log("Sessão atual: " . print_r($_SESSION, true));
+
 // Verificar autenticação
 if (!isset($_SESSION['user_id'])) {
+    error_log("Dashboard - Usuário não autenticado. Redirecionando para login...");
     header('Location: login.php');
     exit();
 }
@@ -13,15 +18,36 @@ if (!isset($_SESSION['user_id'])) {
 // Recuperar informações do usuário
 $usuario = new Usuario();
 $usuario->id = $_SESSION['user_id'];
-$usuario->obterPorId();
+
+error_log("Dashboard - Buscando informações do usuário ID: " . $usuario->id);
+if (!$usuario->obterPorId()) {
+    error_log("Dashboard - Erro ao buscar informações do usuário ID: " . $usuario->id);
+    session_destroy();
+    header('Location: login.php');
+    exit();
+}
 
 // Recuperar listas do usuário
 $lista = new Lista();
 $lista->usuario_id = $_SESSION['user_id'];
-$listas = $lista->listarListasUsuario();
+error_log("Dashboard - Buscando listas do usuário ID: " . $lista->usuario_id);
 
-error_log("Dashboard - User ID: " . $_SESSION['user_id']);
-error_log("Listas encontradas: " . print_r($listas, true));
+$listas = $lista->listarListasUsuario();
+error_log("Dashboard - Listas encontradas: " . print_r($listas, true));
+
+// Calcular estatísticas
+$totalListas = count($listas);
+$itensPendentes = 0;
+$listasConcluidas = 0;
+
+foreach ($listas as $l) {
+    $itensPendentes += $l['itens_pendentes'];
+    if ($l['itens_pendentes'] == 0 && $l['total_itens'] > 0) {
+        $listasConcluidas++;
+    }
+}
+
+error_log("Dashboard - Estatísticas: Total Listas: $totalListas, Itens Pendentes: $itensPendentes, Listas Concluídas: $listasConcluidas");
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" class="scroll-smooth">
@@ -57,7 +83,7 @@ error_log("Listas encontradas: " . print_r($listas, true));
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-gray-500 text-sm">Total de Listas</h3>
-                            <p id="totalListas" class="text-2xl font-bold text-blue-600"><?php echo count($listas); ?></p>
+                            <p id="totalListas" class="text-2xl font-bold text-blue-600"><?php echo $totalListas; ?></p>
                         </div>
                         <i data-feather="clipboard" class="w-8 h-8 text-blue-500"></i>
                     </div>
@@ -66,15 +92,7 @@ error_log("Listas encontradas: " . print_r($listas, true));
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-gray-500 text-sm">Itens Pendentes</h3>
-                            <p id="itensPendentes" class="text-2xl font-bold text-yellow-600">
-                                <?php 
-                                $totalPendentes = 0;
-                                foreach($listas as $lista) {
-                                    $totalPendentes += $lista['itens_pendentes'];
-                                }
-                                echo $totalPendentes;
-                                ?>
-                            </p>
+                            <p id="itensPendentes" class="text-2xl font-bold text-yellow-600"><?php echo $itensPendentes; ?></p>
                         </div>
                         <i data-feather="clock" class="w-8 h-8 text-yellow-500"></i>
                     </div>
@@ -83,17 +101,7 @@ error_log("Listas encontradas: " . print_r($listas, true));
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-gray-500 text-sm">Listas Concluídas</h3>
-                            <p id="listasConcluidas" class="text-2xl font-bold text-green-600">
-                                <?php 
-                                $totalConcluidas = 0;
-                                foreach($listas as $lista) {
-                                    if ($lista['itens_pendentes'] == 0) {
-                                        $totalConcluidas++;
-                                    }
-                                }
-                                echo $totalConcluidas;
-                                ?>
-                            </p>
+                            <p id="listasConcluidas" class="text-2xl font-bold text-green-600"><?php echo $listasConcluidas; ?></p>
                         </div>
                         <i data-feather="check-circle" class="w-8 h-8 text-green-500"></i>
                     </div>

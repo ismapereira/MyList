@@ -1,6 +1,6 @@
 <?php
 session_start();
-if(isset($_SESSION['usuario_id'])) {
+if(isset($_SESSION['user_id'])) {
     header('Location: dashboard.php');
     exit();
 }
@@ -15,16 +15,24 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $usuario->nome = $_POST['nome'];
     $usuario->email = $_POST['email'];
     $usuario->senha = $_POST['senha'];
+    $confirmar_senha = $_POST['confirmar_senha'];
 
     // Validações básicas
     if(empty($usuario->nome) || empty($usuario->email) || empty($usuario->senha)) {
         $erro = "campos_invalidos";
+    } elseif($usuario->senha !== $confirmar_senha) {
+        $erro = "senhas_nao_coincidem";
     } elseif(strlen($usuario->senha) < 6) {
         $erro = "senha_curta";
+    } elseif($usuario->emailExiste()) {
+        $erro = "email_existente";
     } elseif($usuario->criar()) {
-        $sucesso = "Cadastro realizado com sucesso! Faça login para continuar.";
+        $sucesso = "Conta criada com sucesso! Você já pode fazer login.";
+        // Log para debug
+        error_log("Novo usuário criado - Nome: " . $usuario->nome . ", Email: " . $usuario->email);
     } else {
         $erro = "Erro ao cadastrar usuário. Tente novamente.";
+        error_log("Erro ao criar usuário - Nome: " . $usuario->nome . ", Email: " . $usuario->email);
     }
 }
 ?>
@@ -56,6 +64,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 break;
                             case 'campos_invalidos':
                                 echo 'Preencha todos os campos corretamente.';
+                                break;
+                            case 'senhas_nao_coincidem':
+                                echo 'As senhas não coincidem.';
                                 break;
                             case 'senha_curta':
                                 echo 'Senha deve ter no mínimo 6 caracteres.';
