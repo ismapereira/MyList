@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.3.21] - 2025-02-09
+
+### Corrigido
+- Navegação inicial usando dashboard como página principal
+- Remoção de página home.php redundante
+- Links de navegação atualizados
+
+### Refatorado
+- Estrutura de navegação simplificada
+- Sidebar atualizada para usar dashboard como início
+
+## [0.3.20] - 2025-02-09
+
+### Adicionado
+- Página inicial (home.php)
+- Página de Minhas Listas (minhas_listas.php)
+- Página de Configurações (configuracoes.php)
+- Componente de sidebar reutilizável
+- Navegação entre páginas do sistema
+
+### Melhorado
+- Estrutura de navegação
+- Consistência visual entre páginas
+- Experiência do usuário na navegação
+
+### Refatorado
+- Sidebar extraída para componente separado
+- Links de navegação atualizados
+
 ## [0.3.19] - 2025-02-09
 
 ### Adicionado
