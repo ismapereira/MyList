@@ -7,13 +7,31 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         const formData = new FormData(this);
+        
+        // Validar se todos os campos necessários estão presentes
+        const camposObrigatorios = ['lista_id', 'nome', 'quantidade', 'unidade'];
+        for (const campo of camposObrigatorios) {
+            if (!formData.get(campo)) {
+                console.error(`Campo obrigatório ausente: ${campo}`);
+                alert(`Por favor, preencha o campo ${campo}`);
+                return;
+            }
+        }
+
+        console.log('Enviando dados:', Object.fromEntries(formData));
 
         fetch('ajax/adicionar_item.php', {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Resposta recebida:', data);
             if(data.sucesso) {
                 // Adicionar item dinamicamente à lista
                 const novoItem = document.createElement('li');

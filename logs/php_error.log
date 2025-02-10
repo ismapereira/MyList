@@ -1,0 +1,99 @@
+[10-Feb-2025 01:36:54 Europe/Berlin] Iniciando processamento de adicionar_item.php
+[10-Feb-2025 01:36:54 Europe/Berlin] POST data: Array
+(
+    [lista_id] => 13
+    [nome] => Leite
+    [quantidade] => 2
+    [unidade] => l
+)
+
+[10-Feb-2025 01:36:54 Europe/Berlin] SESSION data: Array
+(
+    [user_id] => 1
+    [user_nome] => Ismael Pereira Feitosa
+)
+
+[10-Feb-2025 01:36:54 Europe/Berlin] PHP Warning:  require_once(config/database.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\Desenvolvimentos\MyList\models\Lista.php on line 2
+[10-Feb-2025 01:36:54 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'config/database.php' (include_path='\xampp\php\PEAR') in C:\xampp\htdocs\Desenvolvimentos\MyList\models\Lista.php:2
+Stack trace:
+#0 C:\xampp\htdocs\Desenvolvimentos\MyList\ajax\adicionar_item.php(24): require_once()
+#1 {main}
+  thrown in C:\xampp\htdocs\Desenvolvimentos\MyList\models\Lista.php on line 2
+[10-Feb-2025 01:39:51 Europe/Berlin] 2025-02-10 01:39:51 - Iniciando processamento de adicionar_item.php
+[10-Feb-2025 01:39:51 Europe/Berlin] 2025-02-10 01:39:51 - POST data - Data: Array
+(
+    [lista_id] => 13
+    [nome] => Leite
+    [quantidade] => 2
+    [unidade] => l
+)
+
+[10-Feb-2025 01:39:51 Europe/Berlin] 2025-02-10 01:39:51 - SESSION data - Data: Array
+(
+    [user_id] => 1
+    [user_nome] => Ismael Pereira Feitosa
+)
+
+[10-Feb-2025 01:39:51 Europe/Berlin] 2025-02-10 01:39:51 - Item adicionado com sucesso - Data: Array
+(
+    [item_id] => 4
+    [lista_id] => 13
+)
+
+[10-Feb-2025 01:43:50 Europe/Berlin] 2025-02-10 01:43:50 - Iniciando processamento de marcar_item.php
+[10-Feb-2025 01:43:50 Europe/Berlin] 2025-02-10 01:43:50 - POST data - Data: Array
+(
+    [item_id] => 4
+    [comprado] => 1
+)
+
+[10-Feb-2025 01:43:50 Europe/Berlin] 2025-02-10 01:43:50 - SESSION data - Data: Array
+(
+    [user_id] => 1
+    [user_nome] => Ismael Pereira Feitosa
+)
+
+[10-Feb-2025 01:43:50 Europe/Berlin] 2025-02-10 01:43:50 - Item marcado com sucesso - Data: Array
+(
+    [item_id] => 4
+    [comprado] => 1
+)
+
+[10-Feb-2025 01:44:00 Europe/Berlin] 2025-02-10 01:44:00 - Iniciando processamento de adicionar_item.php
+[10-Feb-2025 01:44:00 Europe/Berlin] 2025-02-10 01:44:00 - POST data - Data: Array
+(
+    [lista_id] => 13
+    [nome] => Café
+    [quantidade] => 2
+    [unidade] => un
+)
+
+[10-Feb-2025 01:44:00 Europe/Berlin] 2025-02-10 01:44:00 - SESSION data - Data: Array
+(
+    [user_id] => 1
+    [user_nome] => Ismael Pereira Feitosa
+)
+
+[10-Feb-2025 01:44:00 Europe/Berlin] 2025-02-10 01:44:00 - Item adicionado com sucesso - Data: Array
+(
+    [item_id] => 5
+    [lista_id] => 13
+)
+
+[10-Feb-2025 01:44:03 Europe/Berlin] 2025-02-10 01:44:03 - Iniciando processamento de remover_item.php
+[10-Feb-2025 01:44:03 Europe/Berlin] 2025-02-10 01:44:03 - POST data - Data: Array
+(
+    [item_id] => 5
+)
+
+[10-Feb-2025 01:44:03 Europe/Berlin] 2025-02-10 01:44:03 - SESSION data - Data: Array
+(
+    [user_id] => 1
+    [user_nome] => Ismael Pereira Feitosa
+)
+
+[10-Feb-2025 01:44:03 Europe/Berlin] 2025-02-10 01:44:03 - Item removido com sucesso - Data: Array
+(
+    [item_id] => 5
+)
+

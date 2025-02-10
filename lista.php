@@ -66,9 +66,11 @@ error_log("Itens da lista: " . print_r($itens, true));
             </div>
 
             <!-- Adicionar Item -->
-            <form id="adicionarItemForm" class="mb-6 flex space-x-2">
+            <form id="formulario-adicionar-item" class="mb-6 flex space-x-2">
+                <input type="hidden" name="lista_id" value="<?php echo htmlspecialchars($detalhesLista['id']); ?>">
                 <input 
                     type="text" 
+                    name="nome" 
                     id="nomeItem" 
                     placeholder="Nome do item" 
                     required 
@@ -76,6 +78,7 @@ error_log("Itens da lista: " . print_r($itens, true));
                 >
                 <input 
                     type="number" 
+                    name="quantidade" 
                     id="quantidadeItem" 
                     placeholder="Qtd" 
                     min="0.1" 
@@ -84,6 +87,7 @@ error_log("Itens da lista: " . print_r($itens, true));
                     class="w-24 px-4 py-2 rounded-lg bg-gray-100 border focus:border-blue-500 focus:outline-none"
                 >
                 <select 
+                    name="unidade" 
                     id="unidadeItem" 
                     required 
                     class="w-32 px-4 py-2 rounded-lg bg-gray-100 border focus:border-blue-500 focus:outline-none"
@@ -99,7 +103,6 @@ error_log("Itens da lista: " . print_r($itens, true));
                     class="btn-primary px-4 py-2 rounded-lg flex items-center space-x-2"
                 >
                     <i data-feather="plus" class="w-5 h-5"></i>
-                    <span>Adicionar</span>
                 </button>
             </form>
 
@@ -174,155 +177,200 @@ error_log("Itens da lista: " . print_r($itens, true));
         }
 
         // Adicionar item
-        document.getElementById('adicionarItemForm').addEventListener('submit', function(e) {
+        document.getElementById('formulario-adicionar-item').addEventListener('submit', function(e) {
             e.preventDefault();
-            const nome = document.getElementById('nomeItem').value.trim();
-            const quantidade = document.getElementById('quantidadeItem').value;
-            const unidade = document.getElementById('unidadeItem').value;
+            
+            const formData = new FormData(this);
+            
+            // Log para debug
+            console.log('Enviando dados:', {
+                lista_id: formData.get('lista_id'),
+                nome: formData.get('nome'),
+                quantidade: formData.get('quantidade'),
+                unidade: formData.get('unidade')
+            });
 
-            if (nome && quantidade && unidade) {
-                fetch('lista_ajax.php?action=adicionar_item', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        lista_id: listaId,
-                        nome: nome,
-                        quantidade: quantidade,
-                        unidade: unidade
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Adicionar item à lista visualmente
-                        const novoItem = document.createElement('div');
-                        novoItem.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg';
-                        novoItem.innerHTML = `
-                            <div class="flex items-center space-x-3">
-                                <input 
-                                    type="checkbox" 
-                                    class="item-checkbox" 
-                                    data-item-id="${data.item_id}"
-                                >
-                                <span>${nome}</span>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <span class="text-gray-600">
-                                    ${quantidade} ${unidade}
-                                </span>
-                                <button class="text-red-500 hover:text-red-700 excluir-item" data-item-id="${data.item_id}">
-                                    <i data-feather="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        `;
-                        
-                        listaItensElement.appendChild(novoItem);
-                        feather.replace(); // Recarregar ícones
-                        
-                        // Atualizar contadores
-                        totalItensElement.textContent = parseInt(totalItensElement.textContent) + 1;
-                        
-                        // Limpar formulário
-                        document.getElementById('nomeItem').value = '';
-                        document.getElementById('quantidadeItem').value = '';
-                        document.getElementById('unidadeItem').value = 'un';
-                        
-                        showToast(data.message);
-                        
-                        // Adicionar event listeners para novos elementos
-                        setupItemListeners(novoItem);
+            fetch('ajax/adicionar_item.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(async response => {
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    // Se a resposta não for JSON, lê como texto para debug
+                    const text = await response.text();
+                    console.error('Resposta não-JSON recebida:', text);
+                    throw new Error('Resposta inválida do servidor');
+                }
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Resposta:', data);
+                if (data.sucesso) {
+                    // Criar novo elemento de lista
+                    const novoItem = document.createElement('div');
+                    novoItem.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg';
+                    novoItem.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" 
+                                   class="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 item-checkbox" 
+                                   data-item-id="${data.item_id}"
+                            >
+                            <span class="text-gray-700">${formData.get('nome')}</span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-gray-600">
+                                ${formData.get('quantidade')} ${formData.get('unidade')}
+                            </span>
+                            <button class="text-red-500 hover:text-red-700 excluir-item" data-item-id="${data.item_id}">
+                                <i data-feather="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Remover mensagem de "nenhum item" se existir
+                    const mensagemVazia = document.querySelector('.text-gray-500.py-4');
+                    if (mensagemVazia) {
+                        mensagemVazia.remove();
                     }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    showToast('Erro ao adicionar item', 'error');
-                });
-            }
+                    
+                    // Adicionar à lista
+                    const listaItens = document.querySelector('#listaItens');
+                    if (!listaItens) {
+                        console.error('Elemento #listaItens não encontrado');
+                        throw new Error('Elemento #listaItens não encontrado');
+                    }
+                    listaItens.appendChild(novoItem);
+                    
+                    // Atualizar contadores
+                    const totalItens = document.getElementById('totalItens');
+                    if (totalItens) {
+                        totalItens.textContent = parseInt(totalItens.textContent || '0') + 1;
+                    }
+                    
+                    // Reinicializar ícones
+                    feather.replace();
+                    
+                    // Limpar formulário
+                    this.reset();
+                    
+                    // Configurar listeners para o novo item
+                    setupItemListeners(novoItem);
+                    
+                    // Mostrar mensagem de sucesso
+                    showToast(data.mensagem || 'Item adicionado com sucesso', 'success');
+                } else {
+                    throw new Error(data.mensagem || 'Erro ao adicionar item');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showToast(error.message, 'error');
+            });
         });
 
         // Função para configurar listeners de itens
         function setupItemListeners(itemElement) {
+            if (!itemElement) {
+                console.error('Item element não encontrado');
+                return;
+            }
+
             // Marcar/desmarcar item
             const checkbox = itemElement.querySelector('.item-checkbox');
+            if (!checkbox) {
+                console.error('Checkbox não encontrado no item');
+                return;
+            }
+
             const span = itemElement.querySelector('span');
             const excluirBotao = itemElement.querySelector('.excluir-item');
 
             checkbox.addEventListener('change', function() {
                 const itemId = this.dataset.itemId;
-                const status = this.checked ? 'comprado' : 'pendente';
+                const comprado = this.checked;
                 
-                fetch('lista_ajax.php?action=atualizar_status', {
-                    method: 'PUT',
+                fetch('ajax/marcar_item.php', {
+                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: JSON.stringify({
-                        lista_id: listaId,
-                        item_id: itemId,
-                        status: status
-                    })
+                    body: `item_id=${itemId}&comprado=${comprado ? 1 : 0}`
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    if (data.success) {
+                    if (data.sucesso) {
                         // Atualizar visual do item
-                        if (status === 'comprado') {
+                        if (comprado) {
                             span.classList.add('line-through', 'text-gray-500');
-                            itensConcluidosElement.textContent = 
-                                parseInt(itensConcluidosElement.textContent) + 1;
+                            const itensConcluidos = document.getElementById('itensConcluidos');
+                            if (itensConcluidos) {
+                                itensConcluidos.textContent = parseInt(itensConcluidos.textContent) + 1;
+                            }
                         } else {
                             span.classList.remove('line-through', 'text-gray-500');
-                            itensConcluidosElement.textContent = 
-                                parseInt(itensConcluidosElement.textContent) - 1;
+                            const itensConcluidos = document.getElementById('itensConcluidos');
+                            if (itensConcluidos) {
+                                itensConcluidos.textContent = parseInt(itensConcluidos.textContent) - 1;
+                            }
                         }
-                        showToast(data.message);
+                        showToast('Status do item atualizado');
+                    } else {
+                        throw new Error(data.mensagem || 'Erro ao atualizar status');
                     }
                 })
                 .catch(error => {
                     console.error('Erro:', error);
-                    showToast('Erro ao atualizar status', 'error');
-                    checkbox.checked = !checkbox.checked; // Reverter checkbox
+                    showToast(error.message, 'error');
+                    // Reverter checkbox para estado anterior
+                    this.checked = !comprado;
                 });
             });
 
-            // Excluir item
-            excluirBotao.addEventListener('click', function() {
-                const itemId = this.dataset.itemId;
-                
-                fetch('lista_ajax.php?action=excluir_item', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        item_id: itemId
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Remover item da lista
-                        itemElement.remove();
-                        
-                        // Atualizar contadores
-                        const totalItensElement = document.getElementById('totalItens');
-                        totalItensElement.textContent = parseInt(totalItensElement.textContent) - 1;
-                        
-                        if (checkbox.checked) {
-                            const itensConcluidosElement = document.getElementById('itensConcluidos');
-                            itensConcluidosElement.textContent = parseInt(itensConcluidosElement.textContent) - 1;
-                        }
-                    } else {
-                        throw new Error(data.error || 'Erro ao excluir item');
+            if (excluirBotao) {
+                excluirBotao.addEventListener('click', function() {
+                    const itemId = this.dataset.itemId;
+                    if (confirm('Tem certeza que deseja excluir este item?')) {
+                        fetch('ajax/remover_item.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `item_id=${itemId}`
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.sucesso) {
+                                itemElement.remove();
+                                const totalItens = document.getElementById('totalItens');
+                                if (totalItens) {
+                                    totalItens.textContent = parseInt(totalItens.textContent) - 1;
+                                }
+                                showToast('Item removido com sucesso');
+                            } else {
+                                throw new Error(data.mensagem || 'Erro ao remover item');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro:', error);
+                            showToast(error.message, 'error');
+                        });
                     }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    alert('Erro ao excluir item. Por favor, tente novamente.');
                 });
-            });
+            }
         }
 
         // Configurar listeners para itens existentes

@@ -1,6 +1,29 @@
 # Changelog
 
-## [1.0.0] - 2025-02-09
+## [1.1.0] - 2025-02-09
+### Adicionado
+- Sistema de logs detalhado para todas as operações
+- Validação de propriedade de itens antes de operações
+- Novo método `verificarProprietarioItem` na classe Lista
+
+### Corrigido
+- Erro na autenticação de usuário em operações AJAX
+- Problema com checkbox em itens recém-adicionados
+- Erro 500 ao adicionar novos itens
+- Referências incorretas à tabela de itens no banco de dados
+
+### Alterado
+- Melhorada a estrutura do HTML gerado para novos itens
+- Atualizado o sistema de tratamento de erros
+- Refatorado o código de manipulação de itens
+- Melhorada a documentação do projeto
+
+### Segurança
+- Adicionada verificação de autenticação em todos os endpoints AJAX
+- Implementada validação de propriedade de itens
+- Melhorado o sistema de sanitização de inputs
+
+## [1.0.0] - 2025-02-01
 ### Lançamento Oficial
 - Primeira versão estável do sistema
 - Interface completamente redesenhada e responsiva
