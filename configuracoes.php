@@ -4,14 +4,14 @@ require_once 'config/database.php';
 require_once 'models/Usuario.php';
 
 // Verificar autenticação
-if(!isset($_SESSION['usuario_id'])) {
+if(!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
 }
 
 // Recuperar informações do usuário
 $usuario = new Usuario();
-$usuario->id = $_SESSION['usuario_id'];
+$usuario->id = $_SESSION['user_id'];
 $usuario->obterPorId();
 ?>
 <!DOCTYPE html>

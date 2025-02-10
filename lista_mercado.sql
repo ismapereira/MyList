@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 10/02/2025 às 00:13
+-- Tempo de geração: 10/02/2025 às 14:23
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -36,14 +36,6 @@ CREATE TABLE `itens_lista` (
   `comprado` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
---
--- Despejando dados para a tabela `itens_lista`
---
-
-INSERT INTO `itens_lista` (`id`, `lista_id`, `nome`, `quantidade`, `unidade`, `comprado`) VALUES
-(2, 12, 'Leite', 2.00, 'l', 0),
-(3, 12, 'Café', 2.00, 'un', 0);
-
 -- --------------------------------------------------------
 
 --
@@ -57,13 +49,6 @@ CREATE TABLE `listas` (
   `usuario_id` int(11) NOT NULL,
   `data_criacao` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Despejando dados para a tabela `listas`
---
-
-INSERT INTO `listas` (`id`, `nome`, `descricao`, `usuario_id`, `data_criacao`) VALUES
-(12, 'Compras de hoje', NULL, 1, '2025-02-09 22:22:16');
 
 -- --------------------------------------------------------
 
@@ -120,13 +105,13 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `itens_lista`
 --
 ALTER TABLE `itens_lista`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `listas`
 --
 ALTER TABLE `listas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de tabela `usuarios`
